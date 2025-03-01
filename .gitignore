@@ -1,0 +1,31 @@
+# 依赖目录
+node_modules/
+pnpm-lock.yaml
+
+# 构建输出
+dist/
+build/
+*.log
+
+# 环境文件
+.env
+.env.*
+.idea/
+.vscode/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 需要忽略的特定目录
+client_o/
