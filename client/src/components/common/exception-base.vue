@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { $t } from '@/locales';
 import { useRouterPush } from '@/hooks/common/router';
+import { useAuthStore } from '@/store/modules/auth';
+
 
 defineOptions({ name: 'ExceptionBase' });
 
@@ -29,6 +31,14 @@ const iconMap: Record<ExceptionType, string> = {
 };
 
 const icon = computed(() => iconMap[props.type]);
+const auth = useAuthStore()
+const backToHome = () => {
+  if (auth.userInfo.role == 'admin')
+    routerPushByKey('system')
+  else 
+    routerPushByKey('root')
+}
+
 </script>
 
 <template>
@@ -36,7 +46,7 @@ const icon = computed(() => iconMap[props.type]);
     <div class="flex text-400px text-primary">
       <SvgIcon :local-icon="icon" />
     </div>
-    <ElButton type="primary" @click="routerPushByKey('root')">{{ $t('common.backToHome') }}</ElButton>
+    <ElButton type="primary" @click="backToHome">{{ $t('common.backToHome') }}</ElButton>
   </div>
 </template>
 

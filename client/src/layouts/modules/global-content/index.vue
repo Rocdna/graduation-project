@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { useRouteStore } from '@/store/modules/route';
 import { useTabStore } from '@/store/modules/tab';
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 defineOptions({ name: 'GlobalContent' });
 
@@ -26,8 +27,9 @@ const transitionName = computed(() => (themeStore.page.animate ? themeStore.page
 
 function resetScroll() {
   const el = document.querySelector(`#${LAYOUT_SCROLL_EL_ID}`);
-
   el?.scrollTo({ left: 0, top: 0 });
+  window.scrollTo(0, 0); // 重置滚动位置
+  ScrollTrigger.refresh(); // 刷新 ScrollTrigger 触发位置
 }
 </script>
 
@@ -35,7 +37,7 @@ function resetScroll() {
   <RouterView v-slot="{ Component, route }">
     <Transition
       :name="transitionName"
-      mode="out-in"
+      mode="in-out"
       @before-leave="appStore.setContentXScrollable(true)"
       @after-leave="resetScroll"
       @after-enter="appStore.setContentXScrollable(false)"
@@ -46,7 +48,7 @@ function resetScroll() {
           v-if="appStore.reloadFlag"
           :key="tabStore.getTabIdByRoute(route)"
           :class="{ 'p-16px': showPadding }"
-          class="flex-grow bg-layout transition-300"
+          class="flex-grow transition-300"
         />
       </KeepAlive>
     </Transition>

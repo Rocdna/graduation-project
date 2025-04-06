@@ -16,7 +16,7 @@ const locale = computed(() => {
 
 const watermarkProps = computed<WatermarkProps>(() => {
   return {
-    content: themeStore.watermark.visible ? themeStore.watermark.text || 'SoybeanAdmin' : '',
+    content: themeStore.watermark.visible ? themeStore.watermark.text || 'Admin' : '',
     cross: true,
     fontSize: 16,
     lineHeight: 16,

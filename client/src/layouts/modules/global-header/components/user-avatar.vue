@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/modules/auth';
 import { useRouterPush } from '@/hooks/common/router';
 import { useSvgIcon } from '@/hooks/common/icon';
 import { $t } from '@/locales';
+import { localStg } from '@/utils/storage';
 
 defineOptions({ name: 'UserAvatar' });
 
@@ -16,7 +17,7 @@ function loginOrRegister() {
   toLogin();
 }
 
-type DropdownKey = 'user-center' | 'logout';
+type DropdownKey = 'system_user-center' | 'logout';
 
 type DropdownOption = {
   key: DropdownKey;
@@ -28,7 +29,7 @@ const options = computed(() => {
   const opts: DropdownOption[] = [
     {
       label: $t('common.userCenter'),
-      key: 'user-center',
+      key: 'system_user-center',
       icon: SvgIconVNode({ icon: 'ph:user-circle', fontSize: 18 })
     },
     {
@@ -84,7 +85,7 @@ function handleDropdown(key: DropdownKey) {
     </template>
     <div class="flex items-center">
       <SvgIcon icon="ph:user-circle" class="mr-5px text-icon-large" />
-      <span class="text-16px font-medium">{{ authStore.userInfo.userName }}</span>
+      <span class="text-16px font-medium">{{ authStore.userInfo.username }}</span>
     </div>
   </ElDropdown>
 </template>

@@ -9,14 +9,14 @@ defineOptions({ name: 'CodeLogin' });
 
 const { toggleLoginModule } = useRouterPush();
 const { formRef, validate } = useForm();
-const { label, isCounting, loading, getCaptcha } = useCaptcha();
+const { label, isCounting, loading, getCaptcha, newCaptcha } = useCaptcha();
 
 interface FormModel {
   phone: string;
   code: string;
 }
 
-const model = ref<FormModel>({ phone: '', code: '' });
+const model = ref<FormModel>({ phone: '18000000000', code: '' });
 
 const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
   const { formRules } = useFormRules();
@@ -26,7 +26,13 @@ const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
 
 async function handleSubmit() {
   await validate();
-  // request
+  const inputCaptcha = model.value.code;
+  if (inputCaptcha != newCaptcha.value) {
+    window.$message?.error($t("page.login.common.invalidCode"));
+    return;
+  }
+
+  // 验证码登录请求
   window.$message?.success($t('page.login.common.validateSuccess'));
 }
 </script>

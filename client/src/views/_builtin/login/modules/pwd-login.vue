@@ -15,60 +15,69 @@ const { formRef, validate } = useForm();
 interface FormModel {
   userName: string;
   password: string;
+  role: string;
 }
+
+const rememberMe = ref<boolean>(true); // 添加 rememberMe 状态
 
 const model = ref<FormModel>({
   userName: 'Soybean',
-  password: '123456'
+  password: '123456',
+  role: 'passenger'
 });
 
 const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
   // inside computed to make locale ref, if not apply i18n, you can define it without computed
   const { formRules } = useFormRules();
-
   return {
     userName: formRules.userName,
-    password: formRules.pwd
+    password: formRules.pwd,
+    role: [{ required: true, message: "请选择角色", trigger: "change" }], // 添加 role 的验证规则
   };
 });
 
+
 async function handleSubmit() {
   await validate();
-  await authStore.login(model.value.userName, model.value.password);
+  await authStore.login(model.value.userName, model.value.password, model.value.role, rememberMe.value);
 }
 
-type AccountKey = 'super' | 'admin' | 'user';
+type AccountKey = 'passenger' | 'driver' | 'admin';
 
 interface Account {
   key: AccountKey;
   label: string;
   userName: string;
   password: string;
+  role: string;
 }
 
 const accounts = computed<Account[]>(() => [
   {
-    key: 'super',
-    label: $t('page.login.pwdLogin.superAdmin'),
-    userName: 'Super',
-    password: '123456'
+    key: 'passenger',
+    label: $t('page.login.pwdLogin.passenger'),
+    userName: 'Soybean',
+    password: '123456',
+    role: 'passenger'
+  },
+  {
+    key: 'driver',
+    label: $t('page.login.pwdLogin.driver'),
+    userName: 'Driver',
+    password: '123123',
+    role: 'driver'
   },
   {
     key: 'admin',
     label: $t('page.login.pwdLogin.admin'),
-    userName: 'Admin',
-    password: '123456'
-  },
-  {
-    key: 'user',
-    label: $t('page.login.pwdLogin.user'),
-    userName: 'User',
-    password: '123456'
+    userName: 'admin',
+    password: '123123',
+    role: 'admin'
   }
 ]);
 
 async function handleAccountLogin(account: Account) {
-  await authStore.login(account.userName, account.password);
+  await authStore.login(account.userName, account.password, account.role, rememberMe.value);
 }
 </script>
 
@@ -87,7 +96,7 @@ async function handleAccountLogin(account: Account) {
     </ElFormItem>
     <ElSpace direction="vertical" :size="24" class="w-full" fill>
       <div class="flex-y-center justify-between">
-        <ElCheckbox>{{ $t('page.login.pwdLogin.rememberMe') }}</ElCheckbox>
+        <ElCheckbox v-model="rememberMe">{{ $t('page.login.pwdLogin.rememberMe') }}</ElCheckbox>
         <ElButton text @click="toggleLoginModule('reset-pwd')">
           {{ $t('page.login.pwdLogin.forgetPassword') }}
         </ElButton>

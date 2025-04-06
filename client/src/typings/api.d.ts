@@ -21,7 +21,10 @@ declare namespace Api {
     }
 
     /** common search params of table */
-    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'size'>;
+    type CommonSearchParams = Pick<
+      Common.PaginatingCommonParams,
+      "current" | "size"
+    >;
 
     /**
      * enable status
@@ -29,12 +32,16 @@ declare namespace Api {
      * - "1": enabled
      * - "2": disabled
      */
-    type EnableStatus = '1' | '2';
+    type EnableStatus = "online" | "offline" | "locked";
+
+
+    type PaymentMethod = "wechat" | "alipay" | "bank"
 
     /** common record */
     type CommonRecord<T = any> = {
+      _id: string;
       /** record id */
-      id: number;
+      id: string;
       /** record creator */
       createBy: string;
       /** record create time */
@@ -59,13 +66,46 @@ declare namespace Api {
       refreshToken: string;
     }
 
+    // 通知设置
+    interface NotificationSettings {
+      orderNotifications?: boolean;
+      paymentNotifications?: boolean;
+      reviewNotifications?: boolean;
+      systemNotifications?: boolean;
+    }
+
+    // 用户资料
+    interface UserProfile {
+      name?: string;
+      idNumber?: string;
+      avatar?: string;
+      birthDate?: string | Date;
+      gender?: 'male'|'female'|'other';
+      rating?: number;
+      licensePlate?: string;
+      vehicleModel?: string;
+      defaultPaymentMethod?: string;
+      status?: 'offline'|'online'|'locked';
+    }
+
+    // 用户全部信息
     interface UserInfo {
-      userId: string;
-      userName: string;
-      roles: string[];
-      buttons: string[];
+      _id: string;
+      username: string;
+      phone?: string;
+      role: 'passenger' | 'admin' | 'driver' | 'visitor';
+      lastLogin?: string | Date;
+      profile?: UserProfile;
+      notificationSettings?: NotificationSettings;
+      createdAt?: string | Date;
+      updatedAt?: string | Date;
     }
   }
+
+
+
+
+
 
   /**
    * namespace Route
@@ -73,7 +113,7 @@ declare namespace Api {
    * backend api module: "route"
    */
   namespace Route {
-    type ElegantConstRoute = import('@elegant-router/types').ElegantConstRoute;
+    type ElegantConstRoute = import("@elegant-router/types").ElegantConstRoute;
 
     interface MenuRoute extends ElegantConstRoute {
       id: string;
@@ -81,7 +121,7 @@ declare namespace Api {
 
     interface UserRoute {
       routes: MenuRoute[];
-      home: import('@elegant-router/types').LastLevelRouteKey;
+      home: import("@elegant-router/types").LastLevelRouteKey;
     }
   }
 
@@ -91,7 +131,10 @@ declare namespace Api {
    * backend api module: "systemManage"
    */
   namespace SystemManage {
-    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'size'>;
+    type CommonSearchParams = Pick<
+      Common.PaginatingCommonParams,
+      "current" | "size"
+    >;
 
     /** role */
     type Role = Common.CommonRecord<{
@@ -105,44 +148,83 @@ declare namespace Api {
 
     /** role search params */
     type RoleSearchParams = CommonType.RecordNullable<
-      Pick<Api.SystemManage.Role, 'roleName' | 'roleCode' | 'status'> & CommonSearchParams
+      Pick<Api.SystemManage.Role, "roleName" | "roleCode" | "status"> &
+        CommonSearchParams
     >;
 
     /** role list */
     type RoleList = Common.PaginatingQueryRecord<Role>;
 
     /** all role */
-    type AllRole = Pick<Role, 'id' | 'roleName' | 'roleCode'>;
+    type AllRole = Pick<Role, "id" | "roleName" | "roleCode">;
 
     /**
      * user gender
      *
      * - "1": "male"
      * - "2": "female"
+     * - "3": "other"
      */
-    type UserGender = '1' | '2';
+    type UserGender = "male" | "female" | "other";
 
     /** user */
     type User = Common.CommonRecord<{
+      _id: string;
       /** user name */
-      userName: string;
-      /** user gender */
-      userGender: UserGender | undefined;
-      /** user nick name */
-      nickName: string;
+      username: string;
+      /** user pwd */
+      password: string;
       /** user phone */
-      userPhone: string;
-      /** user email */
-      userEmail: string;
-      /** user role code collection */
-      userRoles: string[];
-    }>;
+      phone: string;
+      /** user role */
+      role: string;
+      /** real name */
+      name: string;
+      /** gender */
+      gender: UserGender | undefined;
+      /** rating */
+      rating: number;
+      /** status */
+      status: 'online' | 'offline' | 'locked';
+      /** default payment method (passenger only) */
+      defaultPaymentMethod?: string;
+      /** license plate (driver only) */
+      licensePlate?: string;
+      /** vehicle model (driver only) */
+      vehicleModel?: string;
+}>;
 
     /** user search params */
     type UserSearchParams = CommonType.RecordNullable<
-      Pick<Api.SystemManage.User, 'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'status'> &
-        CommonSearchParams
+      Pick<User, 'username' | 'phone'> & {
+        gender?: 'male' | 'female' | 'other';
+        status?: 'online' | 'offline' | 'locked';
+        name?: string;
+        ratingMin?: number;
+        ratingMax?: number;
+        licensePlate?: string; // driver only
+        vehicleModel?: string; // driver only
+      } & CommonSearchParams
     >;
+
+    type ReviewParams = CommonType.RecordNullable<{
+      /** order Id */
+      orderId: string;
+      /** rating */
+      rating: number;
+      /** review content */
+      content: string;
+      /** reviewer */
+      reviewerId: string;
+      /** reviewee */
+      revieweeId: string;
+      /** review type */
+      reviewType: string;
+      /** isAnonymous */
+      isAnonymous: string;
+      /**review status */
+      status: "pending" | "under_review" | "completed" | "rejected";
+    } & CommonSearchParams>;
 
     /** user list */
     type UserList = Common.PaginatingQueryRecord<User>;
@@ -153,7 +235,7 @@ declare namespace Api {
      * - "1": directory
      * - "2": menu
      */
-    type MenuType = '1' | '2';
+    type MenuType = "1" | "2";
 
     type MenuButton = {
       /**
@@ -172,20 +254,20 @@ declare namespace Api {
      * - "1": iconify icon
      * - "2": local icon
      */
-    type IconType = '1' | '2';
+    type IconType = "1" | "2";
 
     type MenuPropsOfRoute = Pick<
-      import('vue-router').RouteMeta,
-      | 'i18nKey'
-      | 'keepAlive'
-      | 'constant'
-      | 'order'
-      | 'href'
-      | 'hideInMenu'
-      | 'activeMenu'
-      | 'multiTab'
-      | 'fixedIndexInTab'
-      | 'query'
+      import("vue-router").RouteMeta,
+      | "i18nKey"
+      | "keepAlive"
+      | "constant"
+      | "order"
+      | "href"
+      | "hideInMenu"
+      | "activeMenu"
+      | "multiTab"
+      | "fixedIndexInTab"
+      | "query"
     >;
 
     type Menu = Common.CommonRecord<{

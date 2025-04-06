@@ -7,11 +7,11 @@ defineOptions({
 <template>
   <DarkModeContainer class="h-full flex-center">
     <a
-      href="https://github.com/soybeanjs/soybean-admin-elp/blob/main/LICENSE"
+      href="https://www.bilibili.com/"
       target="_blank"
       rel="noopener noreferrer"
     >
-      Copyright MIT © 2021 Soybean
+      Copyright MIT © 2025 Rocaler
     </a>
   </DarkModeContainer>
 </template>

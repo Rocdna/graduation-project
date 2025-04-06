@@ -45,7 +45,6 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
     columns: config.columns,
     transformer: res => {
       const { records = [], current = 1, size = 10, total = 0 } = res.data || {};
-
       // Ensure that the size is greater than 0, If it is less than 0, it will cause paging calculation errors.
       const pageSize = size <= 0 ? 10 : size;
 
@@ -55,7 +54,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
           index: (current - 1) * pageSize + index + 1
         };
       });
-
+      
       return {
         data: recordsWithIndex,
         pageNum: current,
@@ -118,7 +117,6 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
     },
     onFetched: async transformed => {
       const { pageNum, pageSize, total } = transformed;
-
       updatePagination({
         currentPage: pageNum,
         pageSize,
@@ -158,7 +156,6 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
       ...pagination,
       pagerCount: isMobile.value ? 3 : 9
     };
-
     return p;
   });
 
@@ -230,9 +227,8 @@ export function useTableOperate<T extends TableData = TableData>(data: Ref<T[]>,
 
   function handleEdit(id: T['id']) {
     operateType.value = 'edit';
-    const findItem = data.value.find(item => item.id === id) || null;
+    const findItem = data.value.find(item => item._id === id) || null;
     editingData.value = jsonClone(findItem);
-
     openDrawer();
   }
 

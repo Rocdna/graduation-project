@@ -7,13 +7,18 @@ declare namespace StorageType {
     //  * the theme settings
     //  */
     // themeSettings: App.Theme.ThemeSetting;
+
+    loginToken: string;
   }
 
   interface Local {
+    role: string;
     /** The i18n language */
     lang: App.I18n.LangType;
     /** The token */
     token: string;
+    /** 记住我 token */
+    loginToken: string;
     /** Fixed sider with mix-menu */
     mixSiderFixed: CommonType.YesOrNo;
     /** The refresh token */

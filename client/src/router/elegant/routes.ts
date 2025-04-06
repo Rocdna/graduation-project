@@ -40,188 +40,15 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'about',
-    path: '/about',
-    component: 'layout.base$view.about',
-    meta: {
-      title: 'about',
-      i18nKey: 'route.about',
-      icon: 'fluent:book-information-24-regular',
-      order: 10
-    }
-  },
-  {
-    name: 'alova',
-    path: '/alova',
-    component: 'layout.base',
-    meta: {
-      title: 'alova',
-      i18nKey: 'route.alova',
-      icon: 'carbon:http',
-      order: 7
-    },
-    children: [
-      {
-        name: 'alova_request',
-        path: '/alova/request',
-        component: 'view.alova_request',
-        meta: {
-          title: 'alova_request',
-          i18nKey: 'route.alova_request',
-          order: 1
-        }
-      },
-      {
-        name: 'alova_scenes',
-        path: '/alova/scenes',
-        component: 'view.alova_scenes',
-        meta: {
-          title: 'alova_scenes',
-          i18nKey: 'route.alova_scenes',
-          icon: 'cbi:scene-dynamic',
-          order: 3
-        }
-      },
-      {
-        name: 'alova_user',
-        path: '/alova/user',
-        component: 'view.alova_user',
-        meta: {
-          title: 'alova_user',
-          i18nKey: 'route.alova_user',
-          icon: 'carbon:user-multiple',
-          order: 2
-        }
-      }
-    ]
-  },
-  {
-    name: 'function',
-    path: '/function',
-    component: 'layout.base',
-    meta: {
-      title: 'function',
-      i18nKey: 'route.function',
-      icon: 'icon-park-outline:all-application',
-      order: 6
-    },
-    children: [
-      {
-        name: 'function_hide-child',
-        path: '/function/hide-child',
-        meta: {
-          title: 'function_hide-child',
-          i18nKey: 'route.function_hide-child',
-          icon: 'material-symbols:filter-list-off',
-          order: 2
-        },
-        redirect: '/function/hide-child/one',
-        children: [
-          {
-            name: 'function_hide-child_one',
-            path: '/function/hide-child/one',
-            component: 'view.function_hide-child_one',
-            meta: {
-              title: 'function_hide-child_one',
-              i18nKey: 'route.function_hide-child_one',
-              icon: 'material-symbols:filter-list-off',
-              hideInMenu: true,
-              activeMenu: 'function_hide-child'
-            }
-          },
-          {
-            name: 'function_hide-child_three',
-            path: '/function/hide-child/three',
-            component: 'view.function_hide-child_three',
-            meta: {
-              title: 'function_hide-child_three',
-              i18nKey: 'route.function_hide-child_three',
-              hideInMenu: true,
-              activeMenu: 'function_hide-child'
-            }
-          },
-          {
-            name: 'function_hide-child_two',
-            path: '/function/hide-child/two',
-            component: 'view.function_hide-child_two',
-            meta: {
-              title: 'function_hide-child_two',
-              i18nKey: 'route.function_hide-child_two',
-              hideInMenu: true,
-              activeMenu: 'function_hide-child'
-            }
-          }
-        ]
-      },
-      {
-        name: 'function_multi-tab',
-        path: '/function/multi-tab',
-        component: 'view.function_multi-tab',
-        meta: {
-          title: 'function_multi-tab',
-          i18nKey: 'route.function_multi-tab',
-          icon: 'ic:round-tab',
-          multiTab: true,
-          hideInMenu: true,
-          activeMenu: 'function_tab'
-        }
-      },
-      {
-        name: 'function_request',
-        path: '/function/request',
-        component: 'view.function_request',
-        meta: {
-          title: 'function_request',
-          i18nKey: 'route.function_request',
-          icon: 'carbon:network-overlay',
-          order: 3
-        }
-      },
-      {
-        name: 'function_super-page',
-        path: '/function/super-page',
-        component: 'view.function_super-page',
-        meta: {
-          title: 'function_super-page',
-          i18nKey: 'route.function_super-page',
-          icon: 'ic:round-supervisor-account',
-          order: 5,
-          roles: ['R_SUPER']
-        }
-      },
-      {
-        name: 'function_tab',
-        path: '/function/tab',
-        component: 'view.function_tab',
-        meta: {
-          title: 'function_tab',
-          i18nKey: 'route.function_tab',
-          icon: 'ic:round-tab',
-          order: 1
-        }
-      },
-      {
-        name: 'function_toggle-auth',
-        path: '/function/toggle-auth',
-        component: 'view.function_toggle-auth',
-        meta: {
-          title: 'function_toggle-auth',
-          i18nKey: 'route.function_toggle-auth',
-          icon: 'ic:round-construction',
-          order: 4
-        }
-      }
-    ]
-  },
-  {
     name: 'home',
     path: '/home',
-    component: 'layout.base$view.home',
+    component: 'layout.bg$view.home',
     meta: {
       title: 'home',
       i18nKey: 'route.home',
-      icon: 'mdi:monitor-dashboard',
-      order: 1
+      constant: true,
+      roles: ['passenger', 'driver', 'visitor'],
+      hideInMenu: true
     }
   },
   {
@@ -232,9 +59,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'iframe-page',
       i18nKey: 'route.iframe-page',
-      constant: true,
-      hideInMenu: true,
-      keepAlive: true
+      hideInMenu: true
     }
   },
   {
@@ -250,387 +75,398 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'manage',
-    path: '/manage',
-    component: 'layout.base',
+    name: 'ride',
+    path: '/ride',
+    component: 'layout.bg',
     meta: {
-      title: 'manage',
-      i18nKey: 'route.manage',
-      icon: 'carbon:cloud-service-management',
-      order: 9,
-      roles: ['R_ADMIN']
+      title: 'ride',
+      i18nKey: 'route.ride',
+      constant: false,
+      hideInMenu: true,
+      icon: 'mdi:racing-helmet'
     },
     children: [
       {
-        name: 'manage_menu',
-        path: '/manage/menu',
-        component: 'view.manage_menu',
+        name: 'ride_carpool',
+        path: '/ride/carpool',
+        component: 'view.ride_carpool',
         meta: {
-          title: 'manage_menu',
-          i18nKey: 'route.manage_menu',
-          icon: 'material-symbols:route',
-          order: 3,
-          roles: ['R_ADMIN'],
-          keepAlive: true
+          title: 'ride_carpool',
+          roles: ['passenger'],
+          i18nKey: 'route.ride_carpool'
         }
       },
       {
-        name: 'manage_role',
-        path: '/manage/role',
-        component: 'view.manage_role',
+        name: 'ride_grab',
+        path: '/ride/grab',
+        component: 'view.ride_grab',
         meta: {
-          title: 'manage_role',
-          i18nKey: 'route.manage_role',
-          icon: 'carbon:user-role',
-          order: 2,
-          roles: ['R_SUPER']
+          title: 'ride_grab',
+          roles: ['driver'],
+          i18nKey: 'route.ride_grab'
         }
       },
       {
-        name: 'manage_user',
-        path: '/manage/user',
-        component: 'view.manage_user',
+        name: 'ride_order',
+        path: '/ride/order',
+        component: 'view.ride_order',
         meta: {
-          title: 'manage_user',
-          i18nKey: 'route.manage_user',
-          icon: 'ic:round-manage-accounts',
-          order: 1,
-          roles: ['R_ADMIN']
+          title: 'ride_order',
+          roles: ['passenger', 'driver'],
+          i18nKey: 'route.ride_order'
         }
       },
       {
-        name: 'manage_user-detail',
-        path: '/manage/user-detail/:id',
-        component: 'view.manage_user-detail',
-        props: true,
+        name: 'ride_profile',
+        path: '/ride/profile',
+        component: 'view.ride_profile',
         meta: {
-          title: 'manage_user-detail',
-          i18nKey: 'route.manage_user-detail',
-          hideInMenu: true,
-          roles: ['R_ADMIN'],
-          activeMenu: 'manage_user'
+          title: 'ride_profile',
+          roles: ['passenger', 'driver'],
+          i18nKey: 'route.ride_profile'
+        }
+      },
+      {
+        name: 'ride_review',
+        path: '/ride/review',
+        component: 'view.ride_review',
+        meta: {
+          title: 'ride_review',
+          roles: ['passenger', 'driver'],
+          i18nKey: 'route.ride_review'
         }
       }
     ]
   },
   {
-    name: 'multi-menu',
-    path: '/multi-menu',
+    name: 'system',
+    path: '/system',
     component: 'layout.base',
+    redirect: '/system/home',
     meta: {
-      title: 'multi-menu',
-      i18nKey: 'route.multi-menu',
-      order: 8
+      title: 'system',
+      i18nKey: 'route.system',
+      constant: false,
+      roles: ['admin'],
+      icon: 'mdi-warehouse'
     },
     children: [
       {
-        name: 'multi-menu_first',
-        path: '/multi-menu/first',
+        name: 'system_about',
+        path: '/system/about',
+        component: 'view.system_about',
         meta: {
-          title: 'multi-menu_first',
-          i18nKey: 'route.multi-menu_first',
-          order: 1
+          title: 'system_about',
+          i18nKey: 'route.system_about',
+          constant: false,
+          order: 7,
+          icon: 'mdi-information-outline'
+        }
+      },
+      {
+        name: 'system_home',
+        path: '/system/home',
+        component: 'view.system_home',
+        meta: {
+          title: 'system_home',
+          i18nKey: 'route.system_home',
+          constant: false,
+          roles: ['admin'],
+          order: 1,
+          icon: 'mdi:view-dashboard'
+        }
+      },
+      {
+        name: 'system_manage',
+        path: '/system/manage',
+        meta: {
+          title: 'system_manage',
+          i18nKey: 'route.system_manage',
+          constant: false,
+          roles: ['admin'],
+          order: 2,
+          icon: 'mdi:cog'
         },
         children: [
           {
-            name: 'multi-menu_first_child',
-            path: '/multi-menu/first/child',
-            component: 'view.multi-menu_first_child',
+            name: 'system_manage_driver',
+            path: '/system/manage/driver',
+            component: 'view.system_manage_driver',
             meta: {
-              title: 'multi-menu_first_child',
-              i18nKey: 'route.multi-menu_first_child'
+              title: 'system_manage_driver',
+              i18nKey: 'route.system_manage_driver',
+              icon: 'mdi:account-star-outline'
+            }
+          },
+          {
+            name: 'system_manage_order',
+            path: '/system/manage/order',
+            component: 'view.system_manage_order',
+            meta: {
+              title: 'system_manage_order',
+              i18nKey: 'route.system_manage_order',
+              icon: 'mdi:archive-outline'
+            }
+          },
+          {
+            name: 'system_manage_passenger',
+            path: '/system/manage/passenger',
+            component: 'view.system_manage_passenger',
+            meta: {
+              title: 'system_manage_passenger',
+              i18nKey: 'route.system_manage_passenger',
+              icon: 'mdi:account-supervisor-outline'
+            }
+          },
+          {
+            name: 'system_manage_review',
+            path: '/system/manage/review',
+            component: 'view.system_manage_review',
+            meta: {
+              title: 'system_manage_review',
+              i18nKey: 'route.system_manage_review',
+              icon: 'mdi:comment-account-outline'
             }
           }
         ]
       },
       {
-        name: 'multi-menu_second',
-        path: '/multi-menu/second',
+        name: 'system_plugin',
+        path: '/system/plugin',
         meta: {
-          title: 'multi-menu_second',
-          i18nKey: 'route.multi-menu_second',
-          order: 2
+          title: 'system_plugin',
+          i18nKey: 'route.system_plugin',
+          constant: false,
+          roles: ['admin'],
+          order: 4
         },
         children: [
           {
-            name: 'multi-menu_second_child',
-            path: '/multi-menu/second/child',
+            name: 'system_plugin_barcode',
+            path: '/system/plugin/barcode',
+            component: 'view.system_plugin_barcode',
             meta: {
-              title: 'multi-menu_second_child',
-              i18nKey: 'route.multi-menu_second_child'
+              title: 'system_plugin_barcode',
+              i18nKey: 'route.system_plugin_barcode'
+            }
+          },
+          {
+            name: 'system_plugin_charts',
+            path: '/system/plugin/charts',
+            meta: {
+              title: 'system_plugin_charts',
+              i18nKey: 'route.system_plugin_charts'
             },
             children: [
               {
-                name: 'multi-menu_second_child_home',
-                path: '/multi-menu/second/child/home',
-                component: 'view.multi-menu_second_child_home',
+                name: 'system_plugin_charts_antv',
+                path: '/system/plugin/charts/antv',
+                component: 'view.system_plugin_charts_antv',
                 meta: {
-                  title: 'multi-menu_second_child_home',
-                  i18nKey: 'route.multi-menu_second_child_home'
+                  title: 'system_plugin_charts_antv',
+                  i18nKey: 'route.system_plugin_charts_antv'
+                }
+              },
+              {
+                name: 'system_plugin_charts_echarts',
+                path: '/system/plugin/charts/echarts',
+                component: 'view.system_plugin_charts_echarts',
+                meta: {
+                  title: 'system_plugin_charts_echarts',
+                  i18nKey: 'route.system_plugin_charts_echarts'
+                }
+              },
+              {
+                name: 'system_plugin_charts_vchart',
+                path: '/system/plugin/charts/vchart',
+                component: 'view.system_plugin_charts_vchart',
+                meta: {
+                  title: 'system_plugin_charts_vchart',
+                  i18nKey: 'route.system_plugin_charts_vchart'
                 }
               }
             ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    name: 'plugin',
-    path: '/plugin',
-    component: 'layout.base',
-    meta: {
-      title: '插件示例',
-      i18nKey: 'route.plugin',
-      order: 7,
-      icon: 'clarity:plugin-line'
-    },
-    children: [
-      {
-        name: 'plugin_barcode',
-        path: '/plugin/barcode',
-        component: 'view.plugin_barcode',
-        meta: {
-          title: 'plugin_barcode',
-          i18nKey: 'route.plugin_barcode',
-          icon: 'ic:round-barcode'
-        }
-      },
-      {
-        name: 'plugin_charts',
-        path: '/plugin/charts',
-        meta: {
-          title: 'plugin_charts',
-          i18nKey: 'route.plugin_charts',
-          icon: 'mdi:chart-areaspline'
-        },
-        children: [
+          },
           {
-            name: 'plugin_charts_antv',
-            path: '/plugin/charts/antv',
-            component: 'view.plugin_charts_antv',
+            name: 'system_plugin_copy',
+            path: '/system/plugin/copy',
+            component: 'view.system_plugin_copy',
             meta: {
-              title: 'plugin_charts_antv',
-              i18nKey: 'route.plugin_charts_antv',
-              icon: 'hugeicons:flow-square'
+              title: 'system_plugin_copy',
+              i18nKey: 'route.system_plugin_copy'
             }
           },
           {
-            name: 'plugin_charts_echarts',
-            path: '/plugin/charts/echarts',
-            component: 'view.plugin_charts_echarts',
+            name: 'system_plugin_editor',
+            path: '/system/plugin/editor',
             meta: {
-              title: 'plugin_charts_echarts',
-              i18nKey: 'route.plugin_charts_echarts',
-              icon: 'simple-icons:apacheecharts'
+              title: 'system_plugin_editor',
+              i18nKey: 'route.system_plugin_editor'
+            },
+            children: [
+              {
+                name: 'system_plugin_editor_markdown',
+                path: '/system/plugin/editor/markdown',
+                component: 'view.system_plugin_editor_markdown',
+                meta: {
+                  title: 'system_plugin_editor_markdown',
+                  i18nKey: 'route.system_plugin_editor_markdown'
+                }
+              },
+              {
+                name: 'system_plugin_editor_quill',
+                path: '/system/plugin/editor/quill',
+                component: 'view.system_plugin_editor_quill',
+                meta: {
+                  title: 'system_plugin_editor_quill',
+                  i18nKey: 'route.system_plugin_editor_quill'
+                }
+              }
+            ]
+          },
+          {
+            name: 'system_plugin_excel',
+            path: '/system/plugin/excel',
+            component: 'view.system_plugin_excel',
+            meta: {
+              title: 'system_plugin_excel',
+              i18nKey: 'route.system_plugin_excel'
             }
           },
           {
-            name: 'plugin_charts_vchart',
-            path: '/plugin/charts/vchart',
-            component: 'view.plugin_charts_vchart',
+            name: 'system_plugin_gantt',
+            path: '/system/plugin/gantt',
             meta: {
-              title: 'plugin_charts_vchart',
-              i18nKey: 'route.plugin_charts_vchart',
-              localIcon: 'visactor'
-            }
-          }
-        ]
-      },
-      {
-        name: 'plugin_copy',
-        path: '/plugin/copy',
-        component: 'view.plugin_copy',
-        meta: {
-          title: 'plugin_copy',
-          i18nKey: 'route.plugin_copy',
-          icon: 'mdi:clipboard-outline'
-        }
-      },
-      {
-        name: 'plugin_editor',
-        path: '/plugin/editor',
-        meta: {
-          title: 'plugin_editor',
-          i18nKey: 'route.plugin_editor',
-          icon: 'icon-park-outline:editor'
-        },
-        children: [
+              title: 'system_plugin_gantt',
+              i18nKey: 'route.system_plugin_gantt'
+            },
+            children: [
+              {
+                name: 'system_plugin_gantt_dhtmlx',
+                path: '/system/plugin/gantt/dhtmlx',
+                component: 'view.system_plugin_gantt_dhtmlx',
+                meta: {
+                  title: 'system_plugin_gantt_dhtmlx',
+                  i18nKey: 'route.system_plugin_gantt_dhtmlx'
+                }
+              },
+              {
+                name: 'system_plugin_gantt_vtable',
+                path: '/system/plugin/gantt/vtable',
+                component: 'view.system_plugin_gantt_vtable',
+                meta: {
+                  title: 'system_plugin_gantt_vtable',
+                  i18nKey: 'route.system_plugin_gantt_vtable'
+                }
+              }
+            ]
+          },
           {
-            name: 'plugin_editor_markdown',
-            path: '/plugin/editor/markdown',
-            component: 'view.plugin_editor_markdown',
+            name: 'system_plugin_icon',
+            path: '/system/plugin/icon',
+            component: 'view.system_plugin_icon',
             meta: {
-              title: 'plugin_editor_markdown',
-              i18nKey: 'route.plugin_editor_markdown',
-              icon: 'ri:markdown-line'
+              title: 'system_plugin_icon',
+              i18nKey: 'route.system_plugin_icon'
             }
           },
           {
-            name: 'plugin_editor_quill',
-            path: '/plugin/editor/quill',
-            component: 'view.plugin_editor_quill',
+            name: 'system_plugin_map',
+            path: '/system/plugin/map',
+            component: 'view.system_plugin_map',
             meta: {
-              title: 'plugin_editor_quill',
-              i18nKey: 'route.plugin_editor_quill',
-              icon: 'mdi:file-document-edit-outline'
-            }
-          }
-        ]
-      },
-      {
-        name: 'plugin_excel',
-        path: '/plugin/excel',
-        component: 'view.plugin_excel',
-        meta: {
-          title: 'plugin_excel',
-          i18nKey: 'route.plugin_excel',
-          icon: 'ri:file-excel-2-line',
-          keepAlive: true
-        }
-      },
-      {
-        name: 'plugin_gantt',
-        path: '/plugin/gantt',
-        meta: {
-          title: 'plugin_gantt',
-          i18nKey: 'route.plugin_gantt',
-          icon: 'ant-design:bar-chart-outlined'
-        },
-        children: [
-          {
-            name: 'plugin_gantt_dhtmlx',
-            path: '/plugin/gantt/dhtmlx',
-            component: 'view.plugin_gantt_dhtmlx',
-            meta: {
-              title: 'plugin_gantt_dhtmlx',
-              i18nKey: 'route.plugin_gantt_dhtmlx',
-              icon: 'gridicons:posts'
+              title: 'system_plugin_map',
+              i18nKey: 'route.system_plugin_map'
             }
           },
           {
-            name: 'plugin_gantt_vtable',
-            path: '/plugin/gantt/vtable',
-            component: 'view.plugin_gantt_vtable',
+            name: 'system_plugin_pdf',
+            path: '/system/plugin/pdf',
+            component: 'view.system_plugin_pdf',
             meta: {
-              title: 'plugin_gantt_vtable',
-              i18nKey: 'route.plugin_gantt_vtable',
-              localIcon: 'visactor'
+              title: 'system_plugin_pdf',
+              i18nKey: 'route.system_plugin_pdf'
             }
-          }
-        ]
-      },
-      {
-        name: 'plugin_icon',
-        path: '/plugin/icon',
-        component: 'view.plugin_icon',
-        meta: {
-          title: 'plugin_icon',
-          i18nKey: 'route.plugin_icon',
-          localIcon: 'custom-icon'
-        }
-      },
-      {
-        name: 'plugin_map',
-        path: '/plugin/map',
-        component: 'view.plugin_map',
-        meta: {
-          title: 'plugin_map',
-          i18nKey: 'route.plugin_map',
-          icon: 'mdi:map'
-        }
-      },
-      {
-        name: 'plugin_pdf',
-        path: '/plugin/pdf',
-        component: 'view.plugin_pdf',
-        meta: {
-          title: 'plugin_pdf',
-          i18nKey: 'route.plugin_pdf',
-          icon: 'uiw:file-pdf'
-        }
-      },
-      {
-        name: 'plugin_pinyin',
-        path: '/plugin/pinyin',
-        component: 'view.plugin_pinyin',
-        meta: {
-          title: 'plugin_pinyin',
-          i18nKey: 'route.plugin_pinyin',
-          icon: 'entypo-social:google-hangouts'
-        }
-      },
-      {
-        name: 'plugin_print',
-        path: '/plugin/print',
-        component: 'view.plugin_print',
-        meta: {
-          title: 'plugin_print',
-          i18nKey: 'route.plugin_print',
-          icon: 'mdi:printer'
-        }
-      },
-      {
-        name: 'plugin_swiper',
-        path: '/plugin/swiper',
-        component: 'view.plugin_swiper',
-        meta: {
-          title: 'plugin_swiper',
-          i18nKey: 'route.plugin_swiper',
-          icon: 'simple-icons:swiper'
-        }
-      },
-      {
-        name: 'plugin_tables',
-        path: '/plugin/tables',
-        meta: {
-          title: 'plugin_tables',
-          i18nKey: 'route.plugin_tables',
-          icon: 'icon-park-outline:table'
-        },
-        children: [
+          },
           {
-            name: 'plugin_tables_vtable',
-            path: '/plugin/tables/vtable',
-            component: 'view.plugin_tables_vtable',
+            name: 'system_plugin_pinyin',
+            path: '/system/plugin/pinyin',
+            component: 'view.system_plugin_pinyin',
             meta: {
-              title: 'plugin_tables_vtable',
-              i18nKey: 'route.plugin_tables_vtable',
-              localIcon: 'visactor'
+              title: 'system_plugin_pinyin',
+              i18nKey: 'route.system_plugin_pinyin'
+            }
+          },
+          {
+            name: 'system_plugin_print',
+            path: '/system/plugin/print',
+            component: 'view.system_plugin_print',
+            meta: {
+              title: 'system_plugin_print',
+              i18nKey: 'route.system_plugin_print'
+            }
+          },
+          {
+            name: 'system_plugin_swiper',
+            path: '/system/plugin/swiper',
+            component: 'view.system_plugin_swiper',
+            meta: {
+              title: 'system_plugin_swiper',
+              i18nKey: 'route.system_plugin_swiper'
+            }
+          },
+          {
+            name: 'system_plugin_tables',
+            path: '/system/plugin/tables',
+            meta: {
+              title: 'system_plugin_tables',
+              i18nKey: 'route.system_plugin_tables'
+            },
+            children: [
+              {
+                name: 'system_plugin_tables_vtable',
+                path: '/system/plugin/tables/vtable',
+                component: 'view.system_plugin_tables_vtable',
+                meta: {
+                  title: 'system_plugin_tables_vtable',
+                  i18nKey: 'route.system_plugin_tables_vtable'
+                }
+              }
+            ]
+          },
+          {
+            name: 'system_plugin_typeit',
+            path: '/system/plugin/typeit',
+            component: 'view.system_plugin_typeit',
+            meta: {
+              title: 'system_plugin_typeit',
+              i18nKey: 'route.system_plugin_typeit'
+            }
+          },
+          {
+            name: 'system_plugin_video',
+            path: '/system/plugin/video',
+            component: 'view.system_plugin_video',
+            meta: {
+              title: 'system_plugin_video',
+              i18nKey: 'route.system_plugin_video'
             }
           }
         ]
       },
       {
-        name: 'plugin_typeit',
-        path: '/plugin/typeit',
-        component: 'view.plugin_typeit',
+        name: 'system_user-center',
+        path: '/system/user-center',
+        component: 'view.system_user-center',
         meta: {
-          title: 'plugin_typeit',
-          i18nKey: 'route.plugin_typeit',
-          icon: 'mdi:typewriter'
-        }
-      },
-      {
-        name: 'plugin_video',
-        path: '/plugin/video',
-        component: 'view.plugin_video',
-        meta: {
-          title: 'plugin_video',
-          i18nKey: 'route.plugin_video',
-          icon: 'mdi:video'
+          title: 'system_user-center',
+          i18nKey: 'route.system_user-center',
+          constant: false,
+          roles: ['admin'],
+          order: 6,
+          icon: 'mdi:face-man-shimmer-outline'
         }
       }
     ]
-  },
-  {
-    name: 'user-center',
-    path: '/user-center',
-    component: 'layout.base$view.user-center',
-    meta: {
-      title: 'user-center',
-      i18nKey: 'route.user-center',
-      hideInMenu: true
-    }
   }
 ];

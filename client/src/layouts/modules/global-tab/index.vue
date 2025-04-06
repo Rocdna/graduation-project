@@ -112,7 +112,7 @@ function setDropdown(config: Partial<DropdownConfig>) {
 
 let isClickContextMenu = false;
 
-function handleDropdownVisible(visible: boolean) {
+function handleDropdownVisible(visible?: boolean) {
   if (!isClickContextMenu) {
     setDropdown({ visible });
   }
@@ -161,7 +161,6 @@ watch(
     scrollToActiveTab();
   }
 );
-
 // init
 init();
 </script>

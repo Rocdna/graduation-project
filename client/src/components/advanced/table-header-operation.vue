@@ -6,6 +6,7 @@ defineOptions({ name: 'TableHeaderOperation' });
 interface Props {
   disabledDelete?: boolean;
   loading?: boolean;
+  isAdd?: boolean;
 }
 
 defineProps<Props>();
@@ -39,7 +40,7 @@ function refresh() {
   <ElSpace direction="horizontal" wrap justify="end" class="lt-sm:w-200px">
     <slot name="prefix"></slot>
     <slot name="default">
-      <ElButton plain type="primary" @click="add">
+      <ElButton v-if="isAdd" plain type="primary" @click="add">
         <template #icon>
           <icon-ic-round-plus class="text-icon" />
         </template>

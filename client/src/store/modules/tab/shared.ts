@@ -61,7 +61,7 @@ export function getTabIdByRoute(route: App.Global.TabRoute) {
  */
 export function getTabByRoute(route: App.Global.TabRoute) {
   const { name, path, fullPath = path, meta } = route;
-
+  
   const { title, i18nKey, fixedIndexInTab } = meta;
 
   // Get icon and localIcon from getRouteIcons function
@@ -174,7 +174,6 @@ export function extractTabsByAllRoutes(router: Router, tabs: App.Global.Tab[]) {
   const routes = router.getRoutes();
 
   const routeNames = routes.map(route => route.name);
-
   return tabs.filter(tab => routeNames.includes(tab.routeKey));
 }
 

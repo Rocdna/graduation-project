@@ -17,7 +17,8 @@ const customRoutes: CustomRoute[] = [
       title: 'exception',
       i18nKey: 'route.exception',
       icon: 'ant-design:exception-outlined',
-      order: 7
+      order: 1,
+      hideInMenu: false
     },
     children: [
       {
@@ -27,7 +28,7 @@ const customRoutes: CustomRoute[] = [
         meta: {
           title: 'exception_403',
           i18nKey: 'route.exception_403',
-          icon: 'ic:baseline-block'
+          icon: 'ic:baseline-block',
         }
       },
       {
@@ -59,66 +60,11 @@ const customRoutes: CustomRoute[] = [
     meta: {
       title: 'document',
       i18nKey: 'route.document',
-      order: 2,
-      icon: 'mdi:file-document-multiple-outline'
+      order: 1,
+      icon: 'mdi:file-document-multiple-outline',
+      hideInMenu: false,
     },
     children: [
-      {
-        name: 'document_antd',
-        path: '/document/antd',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://antdv.com/components/overview-cn'
-        },
-        meta: {
-          title: 'document_antd',
-          i18nKey: 'route.document_antd',
-          order: 7,
-          icon: 'logos:ant-design'
-        }
-      },
-      {
-        name: 'document_naive',
-        path: '/document/naive',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://www.UI.com/zh-CN/os-theme/docs/introduction'
-        },
-        meta: {
-          title: 'document_naive',
-          i18nKey: 'route.document_naive',
-          order: 6,
-          icon: 'logos:naiveui'
-        }
-      },
-      {
-        name: 'document_element-plus',
-        path: '/document/element-plus',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://element-plus.org/zh-CN/'
-        },
-        meta: {
-          title: 'document_element-plus',
-          i18nKey: 'route.document_element-plus',
-          order: 7,
-          icon: 'ep:element-plus'
-        }
-      },
-      {
-        name: 'document_alova',
-        path: '/document/alova',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://alova.js.org'
-        },
-        meta: {
-          title: 'document_alova',
-          i18nKey: 'route.document_alova',
-          order: 8,
-          localIcon: 'alova'
-        }
-      },
       {
         name: 'document_project',
         path: '/document/project',
@@ -129,62 +75,8 @@ const customRoutes: CustomRoute[] = [
         meta: {
           title: 'document_project',
           i18nKey: 'route.document_project',
-          order: 1,
-          localIcon: 'logo'
-        }
-      },
-      {
-        name: 'document_project-link',
-        path: '/document/project-link',
-        component: 'view.iframe-page',
-        meta: {
-          title: 'document_project-link',
-          i18nKey: 'route.document_project-link',
           order: 2,
-          localIcon: 'logo',
-          href: 'https://docs.soybeanjs.cn/zh'
-        }
-      },
-      {
-        name: 'document_unocss',
-        path: '/document/unocss',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://unocss.dev/'
-        },
-        meta: {
-          title: 'document_unocss',
-          i18nKey: 'route.document_unocss',
-          order: 5,
-          icon: 'logos:unocss'
-        }
-      },
-      {
-        name: 'document_vite',
-        path: '/document/vite',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://cn.vitejs.dev/'
-        },
-        meta: {
-          title: 'document_vite',
-          i18nKey: 'route.document_vite',
-          order: 4,
-          icon: 'logos:vitejs'
-        }
-      },
-      {
-        name: 'document_vue',
-        path: '/document/vue',
-        component: 'view.iframe-page',
-        props: {
-          url: 'https://cn.vuejs.org/'
-        },
-        meta: {
-          title: 'document_vue',
-          i18nKey: 'route.document_vue',
-          order: 3,
-          icon: 'logos:vue'
+          localIcon: 'logo'
         }
       }
     ]
@@ -199,8 +91,10 @@ export function createStaticRoutes() {
 
   [...customRoutes, ...generatedRoutes].forEach(item => {
     if (item.meta?.constant) {
+      // 常量路由
       constantRoutes.push(item);
     } else {
+      // 权限路由
       authRoutes.push(item);
     }
   });

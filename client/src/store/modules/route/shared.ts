@@ -9,8 +9,8 @@ import { useSvgIcon } from '@/hooks/common/icon';
  * @param routes Auth routes
  * @param roles Roles
  */
-export function filterAuthRoutesByRoles(routes: ElegantConstRoute[], roles: string[]) {
-  return routes.flatMap(route => filterAuthRouteByRoles(route, roles));
+export function filterAuthRoutesByRoles(routes: ElegantConstRoute[], role: string) {
+  return routes.flatMap(route => filterAuthRouteByRoles(route, role));
 }
 
 /**
@@ -19,19 +19,19 @@ export function filterAuthRoutesByRoles(routes: ElegantConstRoute[], roles: stri
  * @param route Auth route
  * @param roles Roles
  */
-function filterAuthRouteByRoles(route: ElegantConstRoute, roles: string[]): ElegantConstRoute[] {
+function filterAuthRouteByRoles(route: ElegantConstRoute, role: string): ElegantConstRoute[] {
   const routeRoles = (route.meta && route.meta.roles) || [];
 
-  // if the route's "roles" is empty, then it is allowed to access
+  // 如果路由权限是空, 允许通过
   const isEmptyRoles = !routeRoles.length;
 
-  // if the user's role is included in the route's "roles", then it is allowed to access
-  const hasPermission = routeRoles.some(role => roles.includes(role));
+  // 如果用户的权限在路由权限中, 允许通过
+  const hasPermission = routeRoles.includes(role);
 
   const filterRoute = { ...route };
 
   if (filterRoute.children?.length) {
-    filterRoute.children = filterRoute.children.flatMap(item => filterAuthRouteByRoles(item, roles));
+    filterRoute.children = filterRoute.children.flatMap(item => filterAuthRouteByRoles(item, role));
   }
 
   // Exclude the route if it has no children after filtering
@@ -43,7 +43,7 @@ function filterAuthRouteByRoles(route: ElegantConstRoute, roles: string[]): Eleg
 }
 
 /**
- * sort route by order
+ * 通过 order 给路由排序
  *
  * @param route route
  */
@@ -79,11 +79,9 @@ export function getGlobalMenusByAuthRoutes(routes: ElegantConstRoute[]) {
   routes.forEach(route => {
     if (!route.meta?.hideInMenu) {
       const menu = getGlobalMenuByBaseRoute(route);
-
       if (route.children?.some(child => !child.meta?.hideInMenu)) {
         menu.children = getGlobalMenusByAuthRoutes(route.children);
       }
-
       menus.push(menu);
     }
   });
@@ -126,12 +124,9 @@ export function updateLocaleOfGlobalMenus(menus: App.Global.Menu[]) {
  */
 function getGlobalMenuByBaseRoute(route: RouteLocationNormalizedLoaded | ElegantConstRoute) {
   const { SvgIconVNode } = useSvgIcon();
-
   const { name, path } = route;
   const { title, i18nKey, icon = import.meta.env.VITE_MENU_ICON, localIcon, iconFontSize } = route.meta ?? {};
-
   const label = i18nKey ? $t(i18nKey) : title!;
-
   const menu: App.Global.Menu = {
     key: name as string,
     label,
@@ -285,7 +280,7 @@ export function getBreadcrumbsByRoute(
 ): App.Global.Breadcrumb[] {
   const key = route.name as string;
   const activeKey = route.meta?.activeMenu;
-
+  
   for (const menu of menus) {
     if (menu.key === key) {
       return [transformMenuToBreadcrumb(menu)];

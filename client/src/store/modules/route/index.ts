@@ -23,6 +23,8 @@ import {
   updateLocaleOfGlobalMenus
 } from './shared';
 
+import { localStg } from '@/utils/storage';
+
 export const useRouteStore = defineStore(SetupStoreId.Route, () => {
   const authStore = useAuthStore();
   const tabStore = useTabStore();
@@ -37,9 +39,14 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
    * "@elegant-router/vue"
    */
   const authRouteMode = ref(import.meta.env.VITE_AUTH_ROUTE_MODE);
-
+  
   /** Home route key */
   const routeHome = ref(import.meta.env.VITE_ROUTE_HOME);
+  const userAuth = localStg.get('role');
+  if (userAuth == 'admin')
+      routeHome.value = 'system_home'
+
+  
 
   /**
    * Set route home
@@ -47,7 +54,11 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
    * @param routeKey Route key
    */
   function setRouteHome(routeKey: LastLevelRouteKey) {
-    routeHome.value = routeKey;
+    const userAuth = localStg.get('role')
+    if (userAuth == 'admin')
+      routeHome.value = 'system_home'
+    else 
+      routeHome.value = routeKey;
   }
 
   /** constant routes */
@@ -148,12 +159,11 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     removeRouteFns.length = 0;
   }
 
-  /** init constant route */
+  /** 初始化常量路由 */
   async function initConstantRoute() {
     if (isInitConstantRoute.value) return;
 
     const staticRoute = createStaticRoutes();
-
     if (authRouteMode.value === 'static') {
       addConstantRoutes(staticRoute.constantRoutes);
     } else {
@@ -176,8 +186,8 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
 
   /** Init auth route */
   async function initAuthRoute() {
-    // check if user info is initialized
-    if (!authStore.userInfo.userId) {
+    // 检查用户信息是否存在
+    if (!authStore.userInfo.username) {
       await authStore.initUserInfo();
     }
 
@@ -197,7 +207,7 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     if (authStore.isStaticSuper) {
       addAuthRoutes(staticAuthRoutes);
     } else {
-      const filteredAuthRoutes = filterAuthRoutesByRoles(staticAuthRoutes, authStore.userInfo.roles);
+      const filteredAuthRoutes = filterAuthRoutesByRoles(staticAuthRoutes, authStore.userInfo.role);
 
       addAuthRoutes(filteredAuthRoutes);
     }
@@ -229,10 +239,9 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
     }
   }
 
-  /** handle constant and auth routes */
+  /** 处理常量和权限路由 */
   function handleConstantAndAuthRoutes() {
     const allRoutes = [...constantRoutes.value, ...authRoutes.value];
-
     const sortRoutes = sortRoutesByOrder(allRoutes);
 
     const vueRoutes = getAuthVueRoutes(sortRoutes);
@@ -274,7 +283,6 @@ export const useRouteStore = defineStore(SetupStoreId.Route, () => {
    */
   function handleUpdateRootRouteRedirect(redirectKey: LastLevelRouteKey) {
     const redirect = getRoutePath(redirectKey);
-
     if (redirect) {
       const rootRoute: CustomRoute = { ...ROOT_ROUTE, redirect };
 

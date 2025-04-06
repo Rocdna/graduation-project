@@ -419,6 +419,7 @@ declare namespace App {
             codeLogin: string;
             confirm: string;
             back: string;
+            invalidCode: string;
             validateSuccess: string;
             loginSuccess: string;
             welcomeBack: string;
@@ -430,9 +431,9 @@ declare namespace App {
             register: string;
             otherAccountLogin: string;
             otherLoginMode: string;
-            superAdmin: string;
+            passenger: string;
             admin: string;
-            user: string;
+            driver: string;
           };
           codeLogin: {
             title: string;
@@ -443,12 +444,18 @@ declare namespace App {
           };
           register: {
             title: string;
+            passenger: string;
+            driver: string;
             agreement: string;
             protocol: string;
             policy: string;
+            success: string;
+            failure: string;
           };
           resetPwd: {
             title: string;
+            success: string;
+            failure: string;
           };
           bindWeChat: {
             title: string;
@@ -471,19 +478,22 @@ declare namespace App {
           branchDesc: string;
           greeting: string;
           weatherDesc: string;
-          projectCount: string;
-          todo: string;
-          message: string;
-          downloadCount: string;
-          registerCount: string;
+          todayOrders: string; // 今日订单，例如“今日订单”
+          todayMatchRate: string; // 今日匹配率，例如“今日匹配率”
+          newUsers: string; // 今日新增用户，例如“今日新增用户”
+          orderCount: string; // 订单量（折线图），例如“订单量”
+          revenue: string; // 收入（折线图），例如“收入”
+          activeUsers: string; // 活跃用户数（折线图），例如“活跃用户数”
+          todayOrderCount: string; // 今日订单量（统计卡片），例如“今日订单量”
+          todayRevenue: string; // 今日收入（统计卡片），例如“今日收入”
+          activeDrivers: string; // 活跃司机数（统计卡片），例如“活跃司机数”
+          activePassengers: string; // 活跃乘客数（统计卡片），例如“活跃乘客数”
+          userDistribution: string;
           schedule: string;
           study: string;
           work: string;
           rest: string;
           entertainment: string;
-          visitCount: string;
-          turnover: string;
-          dealCount: string;
           projectNews: {
             title: string;
             moreNews: string;
@@ -574,13 +584,23 @@ declare namespace App {
           };
           user: {
             title: string;
+            id: string;
             userName: string;
             userGender: string;
             nickName: string;
             userPhone: string;
+            rating: string;
             userEmail: string;
             userStatus: string;
             userRole: string;
+            defaultPaymentMethod: string;
+            licensePlate: string;
+            vehicleModel: string;
+            paymentMethod: {
+              wechat: string;
+              alipay: string;
+              bank: string;
+            }
             form: {
               userName: string;
               userGender: string;
@@ -589,13 +609,44 @@ declare namespace App {
               userEmail: string;
               userStatus: string;
               userRole: string;
+              idNumber: string;
+              birthDate: string;
+              password: string;
+              usernameRequired: string;
+              usernameLength: string;
+              phoneRequired: string;
+              phoneInvalid: string;
+              passwordRequired: string;
+              passwordLength: string;
+              nameRequired: string;
+              nameLength: string;
+              idNumberInvalid: string;
+              licensePlateInvalid: string;
+              vehicleModelLength: string;
+              defaultPaymentMethod: string;
             };
             addUser: string;
             editUser: string;
             gender: {
               male: string;
               female: string;
+              other: string;
             };
+            status: {
+              offline: string;
+              online: string;
+              locked: string;
+            },
+            messages: {
+              addSuccess: string;
+              updateSuccess: string;
+              operationFailed: string;
+              deleteSuccess: string;
+              deleteFailed: string;
+              batchDeleteSuccess: string;
+              batchDeletePartialSuccess: string;
+              batchDeleteFailed: string;
+            }
           };
           menu: {
             home: string;
@@ -664,6 +715,133 @@ declare namespace App {
               iconify: string;
               local: string;
             };
+          };
+          order: {
+            title: string;
+            // 统计相关
+            stats: {
+              totalOrders: string,
+              totalRevenue: string,
+              avgMatchRate: string,
+              orderCount: string,
+              revenue: string
+            },
+            // 筛选条件
+            filter: {
+              status: string,
+              dateStart: string,
+              dateRange: string,
+              dateEnd: string,
+              filter: string,
+              reset: string,
+              orderNumber: string,
+              statusOptions: {
+                all: string,
+                pending: string,
+                matched: string,
+                confirmed: string,
+                cancelled: string,
+                completed: string,
+              }
+            },
+            // 表格列
+            table: {
+              orderNumber: string,
+              status: string,
+              paymentStatus: string,
+              totalPrice: string,
+              createdAt: string,
+              actions: string,
+              viewDetails: string,
+              updateStatus: string,
+              passenger: string,
+              driver: string,
+            },
+            // 订单详情
+            details: {
+              title: string,
+              orderNumber: string,
+              status: string,
+              startLocation: string,
+              endLocation: string,
+              requestedTime: string,
+              seatCount: string,
+              totalPrice: string,
+              paymentStatus: string,
+              paymentMethod: string,
+              paymentTime: string,
+              passenger: string,
+              driver: string,
+              createdAt: string,
+              cancelReason: string,
+            },
+            // 状态调整
+            statusDialog: {
+              title: string,
+              status: string,
+              cancelReason: string,
+              cancelReasonPlaceholder: string,
+              confirm: string,
+              cancel: string,
+            },
+            // 操作提示
+            messages: {
+              fetchOrdersFailed: string,
+              fetchDetailsFailed: string,
+              updateStatusSuccess: string,
+              updateStatusFailed: string,
+              noOrders: string,
+              cancelReasonRequired: string,
+              orderCancelledCannotModify: string,
+            },
+            status: {
+              pending: string,
+              matched: string,
+              confirmed: string,
+              cancelled: string,
+              completed: string,
+            },
+            actions: {
+              viewDetails: string,
+              adjustStatus: string
+            },
+          };
+          review: {
+            orderNumber: string;
+            reviewer: string;
+            reviewee: string;
+            reviewerId: string;
+            revieweeId: string;
+            reviewType: string;
+            rating: string;
+            content: string;
+            createdAt: string;
+            audit: string;
+            reason: string;
+            isAnonymous: string;
+            type: {
+              PToD: string;
+              DToP: string;
+            };
+            status: {
+              title: string;
+              pending: string;
+              under_review: string;
+              completed: string;
+              rejected: string;
+            },
+            messages: {
+              deleteSuccess: string;
+              auditSuccess: string;
+              operationFailed: string;
+            },
+            form: {
+              statusRequired: string;
+              statusInvalid: string;
+              reasonRequired: string;
+              reasonMinLength: string;
+              reasonMaxLength: string;
+            }
           };
         };
       };
@@ -745,11 +923,11 @@ declare namespace App {
 
     /** The backend service response data */
     type Response<T = unknown> = {
-      /** The backend service response code */
+      /** 后端服务器返回的代码 */
       code: string;
-      /** The backend service response message */
-      msg: string;
-      /** The backend service response data */
+      /** 后端服务器返回的信息 */
+      message: string;
+      /** 后端服务器返回的数据 */
       data: T;
     };
 

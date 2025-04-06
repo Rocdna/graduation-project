@@ -98,6 +98,9 @@ export default function useHookTable<A extends ApiFn, T, C>(config: TableConfig<
 
     const transformed = transformer(response as Awaited<ReturnType<A>>);
 
+    transformed.pageNum = transformed.pageNum - 0;
+    transformed.pageSize = transformed.pageSize - 0;
+
     data.value = transformed.data;
 
     setEmpty(transformed.data.length === 0);

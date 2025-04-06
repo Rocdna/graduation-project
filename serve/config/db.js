@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
@@ -23,10 +24,10 @@ export const connectDB = async () => {
     
     // 更安全的连接验证方式
     const dbConnection = mongoose.connection;
-    console.log(`MongoDB Connected to database: ${dbConnection.name}`);
+    console.log(chalk.bgYellow(`MongoDB Connected to database: ${dbConnection.name}`));
     return connection;
   } catch (err) {
-    console.error("MongoDB connection error:", err.message);
+    console.error(chalk.bgRedBright("MongoDB connection error:", err.message));
     process.exit(1);
   }
 };

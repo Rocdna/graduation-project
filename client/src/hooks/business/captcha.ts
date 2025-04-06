@@ -1,11 +1,18 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useCountDown, useLoading } from '@sa/hooks';
 import { $t } from '@/locales';
 import { REG_PHONE } from '@/constants/reg';
 
+
+export function generateCaptcha() {
+  // 生成一个四位数字的验证码
+  const captcha = Math.floor(1000 + Math.random() * 9000).toString();
+  return captcha;
+}
+const newCaptcha = ref('');
 export function useCaptcha() {
   const { loading, startLoading, endLoading } = useLoading();
-  const { count, start, stop, isCounting } = useCountDown(10);
+  const { count, start, stop, isCounting } = useCountDown(60);
 
   const label = computed(() => {
     let text = $t('page.login.codeLogin.getCode');
@@ -53,6 +60,10 @@ export function useCaptcha() {
       setTimeout(resolve, 500);
     });
 
+    newCaptcha.value = generateCaptcha();
+
+    console.log("验证码：", newCaptcha.value);
+
     window.$message?.success?.($t('page.login.codeLogin.sendCodeSuccess'));
 
     start();
@@ -66,6 +77,7 @@ export function useCaptcha() {
     stop,
     isCounting,
     loading,
-    getCaptcha
+    getCaptcha,
+    newCaptcha
   };
 }

@@ -7,8 +7,33 @@ body,
 #app {
   height: 100%;
   font-size: 14px;
+  background-color: #434343;
 }
 
 html {
   overflow-x: hidden;
+}
+
+/* 滚动条整体宽度 */
+::-webkit-scrollbar {
+  width: 6px; /* 设置为滑块宽度，避免多余空间 */
+}
+
+/* 强制隐藏轨道 */
+::-webkit-scrollbar-track {
+  width: 0 !important; /* 尝试将轨道宽度设为 0 */
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* 滑块样式 */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #444, #666); /* 深灰渐变 */
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #666, #888);
 }

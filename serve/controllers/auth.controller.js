@@ -32,17 +32,17 @@ const validatePassword = (password) => {
 
 // 生成JWT
 const generateTokens = (user) => {
-  const accessToken = jwt.sign(
-    { id: user._id },
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
     process.env.ACCESS_JWT_SECRET,
     { expiresIn: '15m' } // 短期有效
   );
   const refreshToken = jwt.sign(
-    { id: user._id },
+    { id: user._id, role: user.role },
     process.env.REFRESH_JWT_SECRET,
     { expiresIn: '30d' } // 长期有效
   );
-  return { accessToken, refreshToken };
+  return { token, refreshToken };
 };
 
 // 用户是否已存在
@@ -54,46 +54,52 @@ export const isExists = async (req, res) => {
       user = await User.findOne({ username, role });
     }
     if (user) {
-      res.status(200).json({ success: true, exists: true, user });
+      res.status(200).json({ code: 200, message: "用户存在", data: { exists: true, user }});
     } else {
-      res.status(200).json({ success: true, exists: false });
+      res.status(200).json({ code: 201, message: "用户不存在", data: { exists: false, user: null }});
     }
   } catch (error) {
     console.error('检查用户存在性时出错:', error);
-    res.status(500).json({ error: '内部服务器错误' });
+    res.status(500).json({ code: 400, message: '内部服务器错误', data: {}});
   }
 }
 
 // 注册
 export const register = async (req, res) => {
   try {
-    const { username, password, role, email } = req.body;
+    const { userName, password, role, phone } = req.body;
 
     // 验证请求体
-    if (!username || !password) {
-      return res.status(400).json({ message: "用户名和密码是必填项" });
+    if (!userName || !password) {
+      return res.status(200).json({ code: 201, message: "用户名和密码是必填项", data:{} });
     }
 
     // 验证密码强度
     const passwordError = validatePassword(password);
     if (passwordError) {
-      return res.status(400).json({ message: passwordError });
+      return res.status(200).json({ code: 201, message: passwordError, data:{} });
     }
 
     // 检查用户是否已存在
-    const existingUser = await User.findOne({ username, role });
+    const existingUser = await User.findOne({ phone });
     if (existingUser) {
-      return res.status(400).json({ message: "该用户已存在!" });
+      return res.status(200).json({ code: 201, message: "该用户已存在!", data: { exists: true }});
     }
 
     // 创建新用户
     const user = new User({
-      username,
+      username: userName,
       password,
-      email,
-      role: role || "user",
+      phone,
+      role: role || "passenger",
       lastLogin: null,
+      profile: {
+        name: userName,
+        avatar: 'https://truth.bahamut.com.tw/s01/202311/ef035e9530a6934772b4fa9cdb7de40b.JPG',
+        birthDate: '2025-03-01'
+      }
     });
+    
     await user.save();
 
     // 移除敏感信息
@@ -101,111 +107,256 @@ export const register = async (req, res) => {
     delete userResponse.password;
 
     res.status(201).json({
-      success: true,
+      code: 200,
       message: "注册成功",
-      ...userResponse,
+      data: {
+        ...userResponse
+      }
     });
   } catch (error) {
     console.error("Registration error:", error);
     if (error.name === "ValidationError") {
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ code: 400, message: error.message, data:{} });
     }
     if (error.name === "MongoServerError" && error.code === 11000) {
-      return res.status(400).json({ message: "*********" });
+      return res.status(400).json({ code: 400, message: "*********", data:{} });
     }
     // Log the error with more context
     console.error(`Registration error for username ${username}:`, error);
     // Return a more structured error response
     res.status(500).json({
-      success: false,
+      code: 400,
       message: "注册失败，请稍后重试",
-      errorCode: "REG_500",
-      timestamp: new Date().toISOString(),
-      error: process.env.NODE_ENV === "development" ? {
-        message: error.message,
-        stack: error.stack
-      } : undefined,
+      data: {
+        errorCode: "REG_500",
+        timestamp: new Date().toISOString(),
+        error: process.env.NODE_ENV === "development" ? {
+          message: error.message,
+          stack: error.stack
+        } : undefined,
+      }
     });
   }
 };
 
-
 // 登录
 export const login = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { userName, password, role } = req.body;
     // 验证请求体
-    if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "用户名和密码是必填项" 
+    if (!userName || !password) {
+      return res.status(200).json({ 
+        code: 201, 
+        message: "用户名和密码是必填项" ,
+        data:{}
       });
     }
+    const username = userName
     // 查找用户
     const user = await User.findOne({ username, role });
     if (!user) {
-      return res.status(401).json({
-        success: false, 
-        message: "该用户不存在" 
+      return res.status(200).json({
+        code: 201, 
+        message: "该用户不存在" ,
+        data: { exists: false }
       });
     }
-    // 验证密码
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "密码错误" 
+    // 验证密码，有加密
+    // const isMatch = await user.comparePassword(password);
+    // if (!isMatch) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "密码错误"
+    //   });
+    // }
+
+    //验证密码，无加密
+    const pwd = await User.findOne({ username, role, password });
+    if (!pwd) {
+      return res.status(200).json({
+        code: 201, 
+        message: "用户名或密码错误" ,
+        data: { success: false }
       });
     }
-    // 更新最后登录时间
+
+    // 更新最后登录时间和状态
     user.lastLogin = new Date();
+    
     await user.save();
     // 生成JWT
     const tokens = generateTokens(user);
     // 移除敏感信息
     const userResponse = user.toObject();
     delete userResponse.password;
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: false, // 使用 HTTPS 时设置为 true
-      sameSite: 'strict'
+
+    return res.json({ 
+      data: { 
+        ...userResponse, 
+        token: tokens.token,
+        refreshToken: tokens.refreshToken
+      }, 
+      code: 200 
     });
-    return res.json({ ...userResponse, accessToken: tokens.accessToken, success: true });
   } catch (error) {
     console.error("登录错误:", error);
     // Log the error with more context
-    console.error(`Login error for user ${username}:`, error);
-    // Return a more structured error response
     return res.status(500).json({
-      success: false,
+      code: 400,
       message: "登录失败，请稍后重试",
-      errorCode: "AUTH_500",
-      timestamp: new Date().toISOString(),
-      error: process.env.NODE_ENV === "development" ? {
-        message: error.message,
-        stack: error.stack
-      } : undefined,
+      data: {
+        errorCode: "AUTH_500",
+        timestamp: new Date().toISOString(),
+        error: process.env.NODE_ENV === "development" ? {
+          message: error.message,
+          stack: error.stack
+        } : undefined
+      }
     });
   }
 };
 
+// 退出登录
+export const logout = async (req, res) => {
+  try {
+    res.status(200).json({ code: 200, message: '退出登录成功', data: {} });
+  } catch (error) {
+    console.error("退出登录时出错:", error);
+    res.status(500).json({ code: 500, message: '内部服务器错误', data: {} });
+  }
+};
+
+// 重置密码，简洁
+export const resetPassword = async (req, res) => {
+  const { phone, password, role } = req.body;
+  try {
+    if (!phone || !password || !role) {
+      return res.status(200).json({ code: 200, error: 'Missing required fields', data:{} });
+    }
+    // 验证密码强度
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return res.status(200).json({ code: 200, message: passwordError, data: {} });
+    }
+     // 查找用户
+     const user = await User.findOne({ phone, role });
+     if (!user) {
+       return res.status(200).json({ code: 200, message: '该用户不存在', data: { exists: true } });
+     }
+
+    // 更新密码
+    user.password = password;
+    await user.save();
+
+    // 移除敏感信息
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({ code: 200, message: '密码重置成功', data: userResponse });
+
+  } catch (error) {
+    console.error("重置密码时出错:", error);
+    res.status(500).json({ code: 500, message: '内部服务器错误', data: {} });
+  }
+};
 
 // 刷新 Token
 export const refreshToken = async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token not provided' });
-  }
-  jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid refresh token' });
+  try {
+    const refreshToken = req.body.refreshToken;
+    if (!refreshToken) {
+      console.warn('Refresh token not provided');
+      return res.status(200).json({ 
+        code: 777, 
+        message: '未提供 Refresh token', 
+        data: {} 
+      });
     }
-    const accessToken = jwt.sign(
-      { id: decoded.id },
-      process.env.ACCESS_JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-    res.json({ accessToken });
-  });
+
+    // 验证 refresh token
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET);
+    
+    // 检查用户是否存在
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      console.warn(`User not found for refresh token: ${decoded.id}`);
+      return res.status(200).json({ 
+        code: 777, 
+        message: '未找到用户', 
+        data: {} 
+      });
+    }
+
+    // 生成新的 tokens
+    const tokens = generateTokens(user);
+
+    // 返回新的 tokens
+    return res.json({ 
+      code: 200, 
+      message: 'token 刷新成功', 
+      data: { 
+        token: tokens.token,
+        refreshToken: tokens.refreshToken
+      } 
+    });
+
+  } catch (error) {
+    console.error('Refresh token error:', error);
+
+    // refresh token 过期
+    if (error.name === 'TokenExpiredError') {
+      return res.status(403).json({ 
+        code: 777, 
+        message: 'Refresh token expired', 
+        data: {} 
+      });
+    }
+
+    // refresh token 无效
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(403).json({ 
+        code: 777, 
+        message: '无效 refresh token', 
+        data: {} 
+      });
+    }
+
+    return res.status(500).json({ 
+      code: 777, 
+      message: 'Internal server error', 
+      data: {} 
+    });
+  }
 }
 
+// 获取用户信息
+export const getUserInfo = async (req, res) => {
+  try {
+    // 从JWT中获取用户ID, token 过期
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(203).json({ code: 333, message: '未授权', data: { success: false } });
+    }
+    // 验证token  
+    const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
+    // 查询用户信息
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(203).json({ code: 201, message: '用户不存在', data: { success: false } });
+    }
+    res.status(200).json({ 
+      code: 200, 
+      message: '获取用户信息成功',
+      data: user 
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(200).json({ code: 333, message: '无效的token', data: {} });
+    }
+    res.status(500).json({ 
+      code: 500, 
+      message: '获取用户信息失败',
+      data: {} 
+    });
+  }
+}

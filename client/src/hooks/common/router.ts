@@ -2,11 +2,12 @@ import { useRouter } from 'vue-router';
 import type { RouteLocationRaw } from 'vue-router';
 import type { RouteKey } from '@elegant-router/types';
 import { router as globalRouter } from '@/router';
+import { localStg } from '@/utils/storage';
 
 /**
  * Router push
  *
- * Jump to the specified route, it can replace function router.push
+ * 跳转到特殊路由, 可以替代函数 router.push
  *
  * @param inSetup Whether is in vue script setup
  */
@@ -55,11 +56,15 @@ export function useRouterPush(inSetup = true) {
   }
 
   async function toHome() {
+    const role = localStg.get('role') || 'visitor';
+    if (role === 'admin') {
+      return routerPushByKey('system'); 
+    }
     return routerPushByKey('root');
   }
 
   /**
-   * Navigate to login page
+   * 导航到登录页面
    *
    * @param loginModule The login module
    * @param redirectUrl The redirect url, if not specified, it will be the current route fullPath
@@ -94,17 +99,22 @@ export function useRouterPush(inSetup = true) {
   }
 
   /**
-   * Redirect from login
+   * 登录页重定向
    *
    * @param [needRedirect=true] Whether to redirect after login. Default is `true`
    */
   async function redirectFromLogin(needRedirect = true) {
     const redirect = route.value.query?.redirect as string;
-
-    if (needRedirect && redirect) {
-      await routerPush(redirect);
-    } else {
-      await toHome();
+    try {
+      if (needRedirect && redirect) {
+        await routerPush(redirect);
+      } else {
+        await toHome();
+      }
+    } catch (error) {
+      console.error('重定向失败:', error);
+      window.location.reload();
+      // await routerPush({ path: '/' });
     }
   }
 

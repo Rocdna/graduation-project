@@ -28,6 +28,8 @@ function createCommonRequest<ResponseData = any>(
   const retryOptions = createRetryOptions(axiosConf);
   axiosRetry(instance, retryOptions);
 
+
+  // 请求拦截
   instance.interceptors.request.use(conf => {
     const config: InternalAxiosRequestConfig = { ...conf };
 
@@ -48,6 +50,7 @@ function createCommonRequest<ResponseData = any>(
     return handledConfig;
   });
 
+  // 响应拦截
   instance.interceptors.response.use(
     async response => {
       const responseType: ResponseType = (response.config?.responseType as ResponseType) || 'json';
@@ -161,10 +164,8 @@ export function createFlatRequest<ResponseData = any, State = Record<string, unk
 
       if (responseType === 'json') {
         const data = opts.transformBackendResponse(response);
-
         return { data, error: null, response };
       }
-
       return { data: response.data as MappedType<R, T>, error: null };
     } catch (error) {
       return { data: null, error, response: (error as AxiosError<ResponseData>).response };

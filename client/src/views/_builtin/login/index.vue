@@ -6,6 +6,7 @@ import { $t } from '@/locales';
 import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { loginModuleRecord } from '@/constants/app';
+
 import PwdLogin from './modules/pwd-login.vue';
 import CodeLogin from './modules/code-login.vue';
 import Register from './modules/register.vue';

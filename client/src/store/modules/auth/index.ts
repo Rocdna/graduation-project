@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 import { useLoading } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { useRouterPush } from '@/hooks/common/router';
-import { fetchGetUserInfo, fetchLogin } from '@/service/api';
+import { fetchGetUserInfo, fetchLogin, fetchRegister, fetchResetPassword, fetchUpdateProfile, fetchUpdateDriverStatus, fetchUploadAvatar, fetchUpdateNotificationSettings } from '@/service/api';
 import { localStg } from '@/utils/storage';
 import { $t } from '@/locales';
 import { useRouteStore } from '../route';
@@ -15,23 +15,27 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   const route = useRoute();
   const routeStore = useRouteStore();
   const tabStore = useTabStore();
+
   const { toLogin, redirectFromLogin } = useRouterPush(false);
   const { loading: loginLoading, startLoading, endLoading } = useLoading();
 
   const token = ref(getToken());
 
+  // 默认游客
   const userInfo: Api.Auth.UserInfo = reactive({
-    userId: '',
-    userName: '',
-    roles: [],
-    buttons: []
+    _id: '',
+    username: 'visitor',
+    role: 'visitor',
+    phone: '',
+    profile: {},
+    notificationSettings: {}
   });
 
-  /** is super role in static route */
+  /** 在静态路由中，是超级管理员权限 */
   const isStaticSuper = computed(() => {
     const { VITE_AUTH_ROUTE_MODE, VITE_STATIC_SUPER_ROLE } = import.meta.env;
 
-    return VITE_AUTH_ROUTE_MODE === 'static' && userInfo.roles.includes(VITE_STATIC_SUPER_ROLE);
+    return VITE_AUTH_ROUTE_MODE === 'static';
   });
 
   /** Is login */
@@ -40,15 +44,11 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   /** Reset auth store */
   async function resetStore() {
     const authStore = useAuthStore();
-
     clearAuthStorage();
-
     authStore.$reset();
-
     if (!route.meta.constant) {
       await toLogin();
     }
-
     tabStore.cacheTabs();
     routeStore.resetStore();
   }
@@ -58,23 +58,22 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
    *
    * @param userName User name
    * @param password Password
+   * @param role Role
    * @param [redirect=true] Whether to redirect after login. Default is `true`
    */
-  async function login(userName: string, password: string, redirect = true) {
+  async function login(userName: string, password: string, role: string, rememberMe: boolean, redirect = false) {
     startLoading();
 
-    const { data: loginToken, error } = await fetchLogin(userName, password);
-
+    const { data: loginToken, error } = await fetchLogin(userName, password, role);
     if (!error) {
       const pass = await loginByToken(loginToken);
-
       if (pass) {
         await redirectFromLogin(redirect);
-
         window.$notification?.success({
           title: $t('page.login.common.loginSuccess'),
-          message: $t('page.login.common.welcomeBack', { userName: userInfo.userName }),
-          duration: 4500
+          message: $t('page.login.common.welcomeBack', { userName: userInfo.username }),
+          duration: 4500,
+          position: role == 'admin' ? 'top-right' : 'top-left'
         });
       }
     } else {
@@ -85,46 +84,141 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   }
 
   async function loginByToken(loginToken: Api.Auth.LoginToken) {
-    // 1. stored in the localStorage, the later requests need it in headers
+    // 1. 存储在 localStorage, the later requests need it in headers
     localStg.set('token', loginToken.token);
     localStg.set('refreshToken', loginToken.refreshToken);
-
-    // 2. get user info
+    // 2. 获取用户信息
     const pass = await getUserInfo();
-
     if (pass) {
       token.value = loginToken.token;
-
       return true;
     }
-
     return false;
   }
 
   async function getUserInfo() {
-    const { data: info, error } = await fetchGetUserInfo();
-
+    const { data: user, error } = await fetchGetUserInfo();
     if (!error) {
+      localStg.set('role', user.role)
       // update store
-      Object.assign(userInfo, info);
+      Object.assign(userInfo, user);
 
       return true;
     }
-
     return false;
   }
 
+  // 初始化用户信息
   async function initUserInfo() {
     const hasToken = getToken();
-
     if (hasToken) {
       const pass = await getUserInfo();
-
       if (!pass) {
         resetStore();
       }
     }
   }
+
+   /**
+   * 注册
+   *
+   * @param userName Username
+   * @param phone Phone number
+   * @param password Password
+   * @param role Role
+   */
+   async function register(userName: string, phone: string, password: string, role: string) {
+    startLoading();
+    const { data, error } = await fetchRegister(userName, phone, password, role);
+    if (!error) {
+      window.$message?.success($t("page.login.register.success"));
+      await toLogin();
+      endLoading();
+    }
+  }
+  /**
+   * 重置密码
+   *
+   * @param phone Phone number
+   * @param role Role
+   * @param password New password
+   */
+  async function resetPassword(phone: string, password: string, role: string) {
+    startLoading();
+    const { data, error } = await fetchResetPassword(phone, password, role);
+    if (!error) {
+      window.$message?.success($t('page.login.resetPwd.success'));
+      await toLogin();
+      endLoading();
+    }
+  }
+
+
+  /**
+   * 更新司机状态
+   * 
+   * @param status offline | online
+   * 
+   */
+  async function updateDriverStatus(status: string) {
+    const { data, error } = await fetchUpdateDriverStatus(status);
+    if (!error) {
+      if (data.status == 'online')
+        window.$message?.success('您已上线');
+      else 
+        window.$message?.success('您已下线');
+      userInfo.profile = { ...userInfo.profile, status: data.status };
+    }
+  }
+
+  /**
+   * 上传头像
+   * @param avatar Avatar file
+   * 
+   */
+  async function uploadAvatar(avatar: File) {
+    const { data, error } = await fetchUploadAvatar(avatar);
+    if (!error) {
+      window.$message?.success('头像上传成功!');
+      userInfo.profile = { ...userInfo.profile, avatar: data.avatar };
+    }
+  }
+
+  /**
+   * 更新通知设置
+   * 
+   * @param settings
+   */
+  async function updateNotificationSettings(settings: {
+    orderNotifications?: boolean;
+    paymentNotifications?: boolean;
+    reviewNotifications?: boolean;
+    systemNotifications?: boolean;
+  }) {
+    const { data, error } = await fetchUpdateNotificationSettings(settings);
+    if (!error) {
+      window.$message?.success('通知设置成功!');
+      userInfo.notificationSettings = { ...data.notificationSettings };
+    }
+  }
+
+  /**
+   * 更新用户个人信息
+   * @param
+   */
+  async function updateProfile(profile: Api.Auth.UserProfile) {
+    if (!userInfo?.profile) {
+      throw new Error('用户信息未初始化');
+    }
+    const { data, error } = await fetchUpdateProfile(profile);
+    if (!error) {
+      window.$message?.success('保存成功!');
+      userInfo.profile = { ...data.profile };
+    }
+  }
+
+
+
 
   return {
     token,
@@ -134,6 +228,12 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     loginLoading,
     resetStore,
     login,
-    initUserInfo
+    initUserInfo,
+    register,
+    resetPassword,
+    updateDriverStatus,
+    uploadAvatar,
+    updateNotificationSettings,
+    updateProfile
   };
 });
