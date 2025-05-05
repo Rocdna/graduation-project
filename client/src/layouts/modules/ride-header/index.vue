@@ -8,7 +8,6 @@ import { formatToLocal } from '@/utils/format';
 
 const route = useRouter();
 
-
 const authStore = useAuthStore();
 const role = authStore.userInfo.role;
 
@@ -216,6 +215,17 @@ const markAsReadAndClose = async () => {
   selectedMessage.value = null;
 };
 
+
+const effectFlag = computed(() => {
+  return authStore.userInfo.bgEffect;
+})
+
+// 全局特效开关
+const bgEffectSwitch = () => {
+  authStore.updateBgEffectSettings(!effectFlag.value as boolean);
+}
+
+
 const socket = inject('socket') as any;
 
 onMounted(async () => {
@@ -283,6 +293,11 @@ onUnmounted(() => {
           </el-button>
         </div>
         <div v-else class="flex items-center gap-2 md:gap-3 shrink-0">
+          <!-- 全屏特效开关 -->
+          <div class="cursor-pointer" @click="bgEffectSwitch">
+            <SvgIcon v-if="effectFlag" icon="mdi:star-david" class="w-8 h-8 text-gray-300 hover:text-yellow-500 transition-colors duration-300"/>
+            <SvgIcon v-else icon="mdi:star-shooting-outline" class="w-8 h-8 text-gray-300 hover:text-emerald-400 transition-colors duration-300" />
+          </div>
           <!-- 通知信息 -->
           <el-popover
           :placement="isMobile ? 'top' : 'bottom'"

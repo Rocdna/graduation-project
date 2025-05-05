@@ -36,7 +36,6 @@ const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
   };
 });
 
-
 async function handleSubmit() {
   await validate();
   await authStore.login(model.value.userName, model.value.password, model.value.role, rememberMe.value);
@@ -63,7 +62,7 @@ const accounts = computed<Account[]>(() => [
   {
     key: 'driver',
     label: $t('page.login.pwdLogin.driver'),
-    userName: 'Driver',
+    userName: 'rocaler',
     password: '123123',
     role: 'driver'
   },
@@ -76,8 +75,8 @@ const accounts = computed<Account[]>(() => [
   }
 ]);
 
-async function handleAccountLogin(account: Account) {
-  await authStore.login(account.userName, account.password, account.role, rememberMe.value);
+async function handleAccountLogin(account: FormModel, role: string) {
+  await authStore.login(account.userName, account.password, role, rememberMe.value);
 }
 </script>
 
@@ -120,7 +119,7 @@ async function handleAccountLogin(account: Account) {
           size="default"
           type="primary"
           :disabled="authStore.loginLoading"
-          @click="handleAccountLogin(item)"
+          @click="handleAccountLogin(model, item.role)"
         >
           {{ item.label }}
         </ElButton>

@@ -31,6 +31,7 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   system_about: () => import("@/views/system/about/index.vue"),
   system_home: () => import("@/views/system/home/index.vue"),
   system_manage_driver: () => import("@/views/system/manage/driver/index.vue"),
+  system_manage_log: () => import("@/views/system/manage/log/index.vue"),
   system_manage_order: () => import("@/views/system/manage/order/index.vue"),
   system_manage_passenger: () => import("@/views/system/manage/passenger/index.vue"),
   system_manage_review: () => import("@/views/system/manage/review/index.vue"),

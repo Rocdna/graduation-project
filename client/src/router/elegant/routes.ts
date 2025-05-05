@@ -199,6 +199,16 @@ export const generatedRoutes: GeneratedRoute[] = [
             }
           },
           {
+            name: 'system_manage_log',
+            path: '/system/manage/log',
+            component: 'view.system_manage_log',
+            meta: {
+              title: 'system_manage_log',
+              i18nKey: 'route.system_manage_log',
+              icon: 'mdi:math-log'
+            }
+          },
+          {
             name: 'system_manage_order',
             path: '/system/manage/order',
             component: 'view.system_manage_order',

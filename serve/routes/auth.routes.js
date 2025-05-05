@@ -1,5 +1,5 @@
 import express from 'express'
-import { register, login, isExists, refreshToken, logout, resetPassword, getUserInfo } from '../controllers/auth.controller.js'
+import { register, login, isExists, refreshToken, logout, resetPassword, getUserInfo, sendVerification, verifyCode } from '../controllers/auth.controller.js'
 
 const router = express.Router()
 
@@ -17,5 +17,12 @@ router.post('/resetPassword', resetPassword)
 router.post('/refreshToken', refreshToken)
 // 获取用户信息
 router.get('/getUserInfo', getUserInfo)
+
+// 发送验证码
+router.post('/sendVerification', sendVerification)
+// 验证验证码
+router.post('/verifyCode', verifyCode)
+
+
 
 export default router

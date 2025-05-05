@@ -173,6 +173,7 @@ const local: App.I18n.Schema = {
     system_manage_driver: '司机管理',
     system_manage_passenger: '乘客管理',
     system_manage_review: '评价管理',
+    system_manage_log: '操作日志',
     system: '工作台',
     home: '拼途灵动 🎉',
     document: '文档',

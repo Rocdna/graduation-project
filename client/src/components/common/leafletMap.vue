@@ -171,6 +171,7 @@ const updateRoutes = () => {
       console.log('Current polylines on map:', overlays);
 
       map.remove(routeInstances.value);
+      map.clearMap();
     } catch (error) {
       console.error('Failed to remove routes:', error);
       // 备用方案：直接清除地图上的所有覆盖物
@@ -215,9 +216,7 @@ const updateRoutes = () => {
 watch(
   () => props.markers,
   (newMarkers, oldMarkers) => {
-    if (JSON.stringify(newMarkers) !== JSON.stringify(oldMarkers)) {
-      updateMarkers();
-    }
+    updateMarkers();
   },
   { deep: true }
 );
@@ -225,9 +224,7 @@ watch(
 watch(
   () => props.routes,
   (newRoutes, oldRoutes) => {
-    if (JSON.stringify(newRoutes) !== JSON.stringify(oldRoutes)) {
-      updateRoutes();
-    }
+    updateRoutes();
   },
   { deep: true }
 );

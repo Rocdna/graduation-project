@@ -406,3 +406,31 @@ export function fetchDeleteReview(id: string, data: {
     data,
   });
 }
+
+/**
+ * 获取操作日志列表
+ * @param params 查询参数
+ * @returns 日志列表数据
+ */
+export function fetchLogsList(params: {
+  current?: number; // 当前页码
+  size?: number; // 每页条数
+  userId?: string; // 用户ID
+  username?: string; // 用户名
+  role?: 'passenger' | 'driver' | 'admin' | 'system'; // 角色
+  orderId?: string; // 订单ID
+  action?: string; // 操作类型
+  success?: boolean; // 操作是否成功
+  startTime?: string; // 开始时间
+  endTime?: string; // 结束时间
+  sortBy?: string; // 排序字段
+  sortOrder?: 'asc' | 'desc'; // 排序顺序
+}) {
+  return request({
+    url: '/admin/logs',
+    method: 'get',
+    params,
+  });
+}
+
+

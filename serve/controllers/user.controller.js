@@ -307,8 +307,6 @@ export const updateDriverStatus = async (req, res) => {
       user.profile.status = status;
       await user.save();
   
-      // 记录日志
-  
       // 返回结果
       return res.status(200).json({
         code: 200,
@@ -327,3 +325,51 @@ export const updateDriverStatus = async (req, res) => {
       });
     }
 };
+
+// 全屏特效
+export const bgEffectSetting = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const { flag } = req.body;
+    // 权限验证
+    if (userRole !== 'passenger' && userRole !== 'driver') {
+      return res.status(203).json({
+        code: 203,
+        data: { success: false },
+        message: '无权操作，仅乘客、司机可设置全屏特效',
+      });
+    }
+
+    // 查询用户
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(203).json({
+        code: 203,
+        data: { success: false },
+        message: '用户不存在',
+      });
+    }
+
+    // 更新状态
+    user.bgEffect = flag;
+    await user.save();
+
+    // 返回结果
+    return res.status(200).json({
+      code: 200,
+      data: {
+        success: true,
+        bgEffect: user.bgEffect,
+      },
+      message: '全屏特效更新成功',
+    });
+  } catch (error) {
+    console.error('更新全屏特效失败:', error);
+    return res.status(500).json({
+      code: 500,
+      data: { success: false },
+      message: '服务器错误',
+    });
+  }
+}

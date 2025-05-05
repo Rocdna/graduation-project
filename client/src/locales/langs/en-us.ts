@@ -191,6 +191,7 @@ const local: App.I18n.Schema = {
     system_manage_review: 'Review Manage',
     system_manage_order: 'Order Manage',
     system_manage_menu: 'Menu Manage',
+    system_manage_log: 'Log Manage',
     'system_multi-menu': 'Multi Menu',
     'system_multi-menu_first': 'Menu One',
     'system_multi-menu_first_child': 'Menu One Child',

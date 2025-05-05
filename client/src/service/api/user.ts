@@ -78,6 +78,19 @@ export function fetchUpdateNotificationSettings(settings: {
 }
 
 
+/**
+ * 全屏特效设置
+ * 
+ * @param flag 是否使用全屏特效
+ */
+export function fetchBgEffectSettings(flag: boolean) {
+  return request({
+    url: '/users/bgEffectSetting',
+    method: 'patch',
+    data: { flag },
+  })
+}
+
 
 
 

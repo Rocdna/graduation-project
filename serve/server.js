@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes.js'
 import corsOptions from './config/cors.js'
 import cookieParser from 'cookie-parser'
 import chalk from 'chalk'
+import jwt from 'jsonwebtoken';
 import orderRoutes from './routes/order.routes.js'
 import reviewRoutes from './routes/review.routes.js'
 import tripRoutes from './routes/trip.routes.js'
@@ -48,10 +49,10 @@ io.on('connection', (socket) => {
 
   // 用户注册
   socket.on('register', async (data) => {
-    const { userId, token } = data;
+    const { userId, token, role } = data;
     try {
       // 验证 JWT
-      const decoded = jwt.verify(token, process.env.REFRESH_JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET);
       if (decoded.id !== userId) {
         socket.disconnect();
         console.log(chalk.red(`用户 ${userId} 身份验证失败`));
@@ -68,14 +69,15 @@ io.on('connection', (socket) => {
       }
 
       socket.userId = userId;
+      socket.role = user.role;
       clients.set(userId, socket);
+      if (user.role === 'driver') {
+        socket.join('drivers'); // 加入司机房间
+      }
       console.log(chalk.green(`用户 ${userId} 已注册 WebSocket，角色: ${user.role}`));
     } catch (error) {
-      
+      console.log('webSocket 注册失败');
     }
-    socket.userId = userId; // 标记 userId
-    clients.set(userId, socket);
-    console.log(chalk.green(`用户 ${userId} 已注册 WebSocket`));
   });
 
   // 用户注销
@@ -97,6 +99,8 @@ export const notifyUser = (userId, event, data) => {
     console.log(chalk.red(`用户 ${userId} 未在线，无法推送 ${event}`));
   }
 };
+
+export { io, clients };
 
 // 认证路由_登录、注册、获取用户信息
 app.use('/auth', authRoutes)
@@ -127,7 +131,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // 启动订单过期检查任务并保存任务引用
 // const expirationTask = startExpirationCheck();
 
-
 // 启动服务器
 const startServer = async () => {
   try {
@@ -157,7 +160,6 @@ const startServer = async () => {
     process.exit(1)
   }
 }
-
 // 仅在非测试环境下启动服务器
 if (process.env.NODE_ENV !== 'test') {
   startServer()

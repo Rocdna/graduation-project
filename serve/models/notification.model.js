@@ -66,6 +66,11 @@ const notificationSchema = new mongoose.Schema(
       ref: 'Trip',
       index: true, // 添加索引优化查询
     },
+    expiresAt: {
+      type: Date,
+      default: () => Date.now() + 7 * 24 * 60 * 60 * 1000, // 默认7天后过期
+      index: { expireAfterSeconds: 0 }, // MongoDB TTL 索引
+    }
   },
   { timestamps: true }
 );

@@ -843,6 +843,9 @@ declare namespace App {
               reasonMaxLength: string;
             }
           };
+          log: {
+            
+          };
         };
       };
       form: {

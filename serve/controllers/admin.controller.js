@@ -1,7 +1,8 @@
 import Order from '../models/order.model.js'
 import User from '../models/user.model.js'
 import Review from '../models/review.model.js'
-import Trip from '../models/trip.model.js'
+import Log from '../models/log.model.js'
+import Notification from '../models/notification.model.js'
 import createLog from '../utils/logger.js';
 import { createNotification } from '../utils/notification.js';
 
@@ -862,16 +863,6 @@ export const getDriverList = async (req, res) => {
       .select('-tripHistory -orderHistory -reviewHistory -notificationSettings') // 排除敏感字段
       .lean();
 
-    /// 记录日志
-    // await createLog(
-    //   req.user.role, // role
-    //   "get_driver_list", // action
-    //   true, // success
-    //   "获取司机列表成功", // message
-    //   req.user.id, // userId
-    //   req.user.username // username
-    // );
-
     return res.status(200).json({
       code: 200,
       data: { total, records, current, size },
@@ -1537,6 +1528,239 @@ export const deleteReview = async (req, res) => {
   }
 };
 
+
+// 操作日志列表
+export const getLogsList = async (req, res) => {
+  try {
+    // 权限验证：仅管理员可访问
+    if (req.user.role !== 'admin') {
+      return res.status(203).json({
+        code: 203,
+        message: '无权限，仅管理员可访问',
+      });
+    }
+    // 获取查询参数
+    const {
+      current = 1, // 当前页码
+      size = 10, // 每页条数
+      userId, // 筛选：用户ID
+      username, // 筛选：用户名
+      role, // 筛选：角色 (passenger, driver, admin, system)
+      orderId, // 筛选：订单ID
+      action, // 筛选：操作类型
+      success, // 筛选：操作是否成功 (true, false)
+      startTime, // 筛选：开始时间
+      endTime, // 筛选：结束时间
+      sortBy = 'timestamp', // 排序字段 (timestamp, action, etc.)
+      sortOrder = 'desc', // 排序顺序 (asc, desc)
+    } = req.query;
+
+    // 分页参数
+    const pageNum = parseInt(current, 10);
+    const pageSizeNum = parseInt(size, 10);
+    const skip = (pageNum - 1) * pageSizeNum;
+
+    // 构建查询条件
+    const query = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = { $regex: username, $options: 'i' }; // 模糊查询用户名
+    if (role) query.role = role;
+    if (orderId) query.orderId = orderId;
+    if (action) query.action = { $regex: action, $options: 'i' }; // 模糊查询操作类型
+    if (success !== undefined) query.success = success === 'true'; // 转换为布尔值
+    if (startTime || endTime) {
+      query.timestamp = {};
+      if (startTime) query.timestamp.$gte = new Date(startTime);
+      if (endTime) query.timestamp.$lte = new Date(endTime);
+    }
+
+    // 构建排序条件
+    const sort = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // 查询日志
+    const records = await Log.find(query)
+      .populate('userId', 'username') // 填充用户ID对应的用户名
+      .populate('orderId', 'orderNumber') // 填充订单ID对应的订单编号
+      .skip(skip)
+      .limit(pageSizeNum)
+      .sort(sort)
+      .lean();
+  
+    // 查询总数
+    const total = await Log.countDocuments(query);
+
+    return res.status(200).json({
+      code: 200,
+      data: { records, total, current: pageNum, size: pageSizeNum },
+      message: '获取日志列表成功',
+    });
+  } catch (error) {
+    // 记录错误日志
+    await Log.create({
+      userId: req.user.id,
+      username: req.user.username,
+      role: 'admin',
+      action: 'get_logs_list',
+      success: false,
+      message: `获取日志列表失败：${error.message}`,
+    });
+
+    console.error('获取日志列表失败:', error);
+    return res.status(500).json({
+      code: 500,
+      message: '服务器错误',
+    });
+  }
+};
+
+// 通知推送列表
+export const getNotificationsList = async (req, res) => {
+  try {
+    // 获取查询参数
+    const {
+      current = 1, // 当前页码
+      size = 10, // 每页条数
+      recipientId, // 筛选：被通知者ID（仅管理员可用）
+      type, // 筛选：通知类型 (system, order, payment, review, trip, etc.)
+      isRead, // 筛选：是否已读 (true, false)
+      orderId, // 筛选：订单ID
+      sortBy = 'createdAt', // 排序字段 (createdAt, updatedAt, etc.)
+      sortOrder = 'desc', // 排序顺序 (asc, desc)
+    } = req.query;
+
+    // 权限验证
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    // 查询其他用户的通知
+    if (recipientId && userRole !== 'admin') {
+      return res.status(203).json({
+        code: 203,
+        message: '无权限，仅管理员可查询其他用户的通知',
+      });
+    }
+
+    // 分页参数
+    const pageNum = parseInt(current, 10);
+    const pageSizeNum = parseInt(size, 10);
+    const skip = (pageNum - 1) * pageSizeNum;
+
+    // 构建查询条件
+    const query = {};
+    // 如果是管理员且提供了 recipientId，查询指定用户的通知；否则查询当前用户的通知
+    query.recipientId = recipientId && userRole === 'admin' ? recipientId : userId;
+
+    if (type) query.type = type;
+    if (isRead !== undefined) query.isRead = isRead === 'true'; // 转换为布尔值
+    if (orderId) query.orderId = orderId;
+   
+
+    // 构建排序条件
+    const sort = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // 查询通知
+    const records = await Notification.find(query)
+      .populate('recipientId', 'username') // 填充接收者用户名
+      .populate('orderId', 'orderNumber') // 填充订单编号
+      .skip(skip)
+      .limit(pageSizeNum)
+      .sort(sort)
+      .lean();
+
+    // 查询总数
+    const total = await Notification.countDocuments(query);
+
+    // 记录操作日志
+    await Log.create({
+      userId: req.user._id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'get_notifications_list',
+      success: true,
+      message: '获取通知列表成功',
+    });
+
+    return res.status(200).json({
+      code: 200,
+      data: { records, total, current: pageNum, size: pageSizeNum },
+      message: '获取通知列表成功',
+    });
+  } catch (error) {
+    // 记录错误日志
+    await Log.create({
+      userId: req.user._id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'get_notifications_list',
+      success: false,
+      message: `获取通知列表失败：${error.message}`,
+    });
+
+    console.error('获取通知列表失败:', error);
+    return res.status(500).json({
+      code: 500,
+      message: '服务器错误',
+    });
+  }
+};
+
+// 删除某条通知
+export const deleteNotification = async (req, res) => {
+  try {
+    // 获取通知ID
+    const { notificationId } = req.params;
+    const userId = req.user._id;
+
+    // 验证通知是否存在且属于当前用户
+    const notification = await Notification.findOne({
+      _id: notificationId,
+      recipientId: userId,
+    });
+
+    if (!notification) {
+      return res.status(204).json({
+        code: 204,
+        message: '通知不存在或无权限删除',
+      });
+    }
+
+    // 删除通知
+    await Notification.deleteOne({ _id: notificationId });
+
+    // 记录操作日志
+    await Log.create({
+      userId: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'delete_notification',
+      success: true,
+      message: `删除通知成功，通知ID: ${notificationId}`,
+    });
+
+    return res.status(200).json({
+      code: 200,
+      message: '删除通知成功',
+    });
+  } catch (error) {
+    // 记录错误日志
+    await Log.create({
+      userId: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      action: 'delete_notification',
+      success: false,
+      message: `删除通知失败：${error.message}`,
+    });
+
+    console.error('删除通知失败:', error);
+    return res.status(500).json({
+      code: 500,
+      message: '服务器错误',
+    });
+  }
+};
 
 
 

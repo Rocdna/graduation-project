@@ -7,7 +7,7 @@ import createLog from "../utils/logger.js";
 import { processRefund } from "../services/paymentService.js";
 import { createNotification } from "../utils/notification.js";
 import cron from "node-cron";
-import { notifyUser } from "../server.js";
+import { notifyUser, io, clients } from "../server.js";
 // import detectSensitiveWords from "../utils/sensitiveWordDetector.js"
 
 
@@ -105,11 +105,9 @@ export const createOrder = async (req, res) => {
       order
     );
 
-    // for (const [userId, socket] of clients) {
-    //   if (socket.role === 'driver') {
-    //     notifyUser(userId, 'orderRemoved', { orderId: order._id });
-    //   }
-    // }
+    // 广播给所有司机
+    io.to('drivers').emit('newOrder', { order });
+    console.log(`广播 newOrder 到所有司机，订单 ID: ${order._id}`);
 
     res.status(200).json({
       code: 200,
@@ -858,6 +856,7 @@ export const updatePaymentStatus = async (req, res) => {
     // 触发通知
     const passengerId = order.passengerId._id;
     const driverId = order.tripId ? order.tripId.driverId._id : null;
+    console.log(driverId);
     await createNotification(
       passengerId,
       "payment",
@@ -1254,7 +1253,8 @@ export const cancelOrder = async (req, res) => {
         trip ? trip : null
       );
     } else {
-      notifyUser(userId, 'orderRemoved', { orderId: order._id });
+      io.to('drivers').emit('orderRemoved', { orderId: order._id });
+      console.log(`广播 orderRemoved 到所有司机，订单 ID: ${order._id}`);
     }
 
     // 记录成功日志
@@ -1863,8 +1863,8 @@ export const getDriverTasks = async (req, res) => {
 
 // 定期检查订单
 export const startExpirationCheck = () => {
-  // 每 10 分钟检查一次（可调整）
-  cron.schedule("*/10 * * * *", async () => {
+  // 每 30 分钟检查一次（可调整）
+  cron.schedule("*/30 * * * *", async () => {
     try {
       const EXPIRATION_TIME = process.env.EXPIRATION_TIME || 30 * 60 * 1000; // 30 分钟
       const now = new Date();
@@ -1877,7 +1877,6 @@ export const startExpirationCheck = () => {
       }).populate("passengerId", "username");
 
       if (expiredOrders.length === 0) {
-        await createLog("system", "check_expiration", true, "无过期订单");
         return;
       }
 

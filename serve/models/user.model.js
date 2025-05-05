@@ -81,9 +81,6 @@ const userSchema = new mongoose.Schema(
         default: 4
       }, // 车辆总座位数
 
-      
-      
-
       // 乘客特有字段
       defaultPaymentMethod: String,
 
@@ -152,6 +149,12 @@ const userSchema = new mongoose.Schema(
         default: true,
       },
     },
+
+    // 是否需要全局特效
+    bgEffect: {
+      type: Boolean,
+      default: true
+    }
   }, {  timestamps: true }
 );
 

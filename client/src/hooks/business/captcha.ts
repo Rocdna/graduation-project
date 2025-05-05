@@ -2,73 +2,52 @@ import { computed, ref } from 'vue';
 import { useCountDown, useLoading } from '@sa/hooks';
 import { $t } from '@/locales';
 import { REG_PHONE } from '@/constants/reg';
-
-
-export function generateCaptcha() {
-  // 生成一个四位数字的验证码
-  const captcha = Math.floor(1000 + Math.random() * 9000).toString();
-  return captcha;
-}
-const newCaptcha = ref('');
+import { fetchSendVerification } from '@/service/api';
 export function useCaptcha() {
   const { loading, startLoading, endLoading } = useLoading();
   const { count, start, stop, isCounting } = useCountDown(60);
 
   const label = computed(() => {
     let text = $t('page.login.codeLogin.getCode');
-
     const countingLabel = $t('page.login.codeLogin.reGetCode', { time: count.value });
-
     if (loading.value) {
       text = '';
     }
-
     if (isCounting.value) {
       text = countingLabel;
     }
-
     return text;
   });
 
   function isPhoneValid(phone: string) {
     if (phone.trim() === '') {
       window.$message?.error?.($t('form.phone.required'));
-
       return false;
     }
-
     if (!REG_PHONE.test(phone)) {
       window.$message?.error?.($t('form.phone.invalid'));
-
       return false;
     }
-
     return true;
   }
 
   async function getCaptcha(phone: string) {
     const valid = isPhoneValid(phone);
-
     if (!valid || loading.value) {
       return;
     }
-
     startLoading();
-
-    // request
-    await new Promise(resolve => {
-      setTimeout(resolve, 500);
-    });
-
-    newCaptcha.value = generateCaptcha();
-
-    console.log("验证码：", newCaptcha.value);
-
-    window.$message?.success?.($t('page.login.codeLogin.sendCodeSuccess'));
-
-    start();
-
-    endLoading();
+    try {
+      const { data, error } = await fetchSendVerification(phone);
+      if (!error) {
+        window.$message?.success?.('验证码请求发送成功');
+        start();
+      }
+    } catch (error) {
+      window.$message?.error?.('验证码请求发送失败');
+    } finally {
+      endLoading();
+    }
   }
 
   return {
@@ -78,6 +57,6 @@ export function useCaptcha() {
     isCounting,
     loading,
     getCaptcha,
-    newCaptcha
+    
   };
 }

@@ -97,6 +97,7 @@ declare namespace Api {
       lastLogin?: string | Date;
       profile?: UserProfile;
       notificationSettings?: NotificationSettings;
+      bgEffect?: boolean;
       createdAt?: string | Date;
       updatedAt?: string | Date;
     }

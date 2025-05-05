@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 import { useLoading } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { useRouterPush } from '@/hooks/common/router';
-import { fetchGetUserInfo, fetchLogin, fetchRegister, fetchResetPassword, fetchUpdateProfile, fetchUpdateDriverStatus, fetchUploadAvatar, fetchUpdateNotificationSettings } from '@/service/api';
+import { fetchGetUserInfo, fetchLogin, fetchRegister, fetchVerifyCode, fetchBgEffectSettings ,fetchResetPassword, fetchUpdateProfile, fetchUpdateDriverStatus, fetchUploadAvatar, fetchUpdateNotificationSettings } from '@/service/api';
 import { localStg } from '@/utils/storage';
 import { $t } from '@/locales';
 import { useRouteStore } from '../route';
@@ -26,6 +26,7 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     _id: '',
     username: 'visitor',
     role: 'visitor',
+    bgEffect: true,
     phone: '',
     profile: {},
     notificationSettings: {}
@@ -79,7 +80,32 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     } else {
       resetStore();
     }
-
+    endLoading();
+  }
+  /**
+   * 验证码登录
+   *
+   * @param phoneNumber Phone number (e.g., +8612345678900)
+   * @param code Verification code
+   * @param [redirect=true] Whether to redirect after login. Default is `true`
+  */
+  async function loginByCode(phoneNumber: string, code: string, redirect = true) {
+    startLoading();
+    const { data: loginToken, error } = await fetchVerifyCode(phoneNumber, code);
+    if (!error && loginToken) {
+      const pass = await loginByToken(loginToken);
+      if (pass) {
+        await redirectFromLogin(redirect);
+        window.$notification?.success({
+          title: $t('page.login.common.loginSuccess'),
+          message: $t('page.login.common.welcomeBack', { userName: userInfo.username }),
+          duration: 4500,
+          position: 'top-left'
+        });
+      }
+    } else {
+      resetStore();
+    }
     endLoading();
   }
 
@@ -96,10 +122,13 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     return false;
   }
 
+
+
   async function getUserInfo() {
     const { data: user, error } = await fetchGetUserInfo();
     if (!error) {
-      localStg.set('role', user.role)
+      localStg.set('role', user.role);
+      localStg.set('bgEffect', user.bgEffect as boolean);
       // update store
       Object.assign(userInfo, user);
 
@@ -127,9 +156,9 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
    * @param password Password
    * @param role Role
    */
-   async function register(userName: string, phone: string, password: string, role: string) {
+   async function register(userName: string, phone: string, password: string, role: string, code: string) {
     startLoading();
-    const { data, error } = await fetchRegister(userName, phone, password, role);
+    const { data, error } = await fetchRegister(userName, phone, password, role, code);
     if (!error) {
       window.$message?.success($t("page.login.register.success"));
       await toLogin();
@@ -186,7 +215,6 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
 
   /**
    * 更新通知设置
-   * 
    * @param settings
    */
   async function updateNotificationSettings(settings: {
@@ -217,7 +245,18 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     }
   }
 
-
+  /**
+   * 更新全屏特效设置
+   * 
+   * @param settings
+   */
+  async function updateBgEffectSettings(flag: boolean) {
+    const { data, error } = await fetchBgEffectSettings(flag);
+    if (!error) {
+      window.$message?.success('设置成功!');
+      userInfo.bgEffect = data.bgEffect;
+    }
+  }
 
 
   return {
@@ -234,6 +273,8 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     updateDriverStatus,
     uploadAvatar,
     updateNotificationSettings,
-    updateProfile
+    updateProfile,
+    updateBgEffectSettings,
+    loginByCode
   };
 });

@@ -11,17 +11,17 @@ import startIcon from '@/assets/imgs/start.png'  // 起点
 import endIcon from '@/assets/imgs/end.png'
 import driverPng from '@/assets/imgs/travel.png'
 
-// const appStore = useAppStore();
+const appStore = useAppStore();
 
 const orderStore = useOrderStore();
 const orders = computed(() => orderStore.state.tasks);
 
 // 司机当前位置
-const center = ref([121.125179, 30.139966]); // 默认中心点（可通过定位更新）
+const center = ref([121.15530100000001, 30.045689]); // 默认中心点（可通过定位更新）
 
 // 标记点（乘客位置、司机位置）
 const markers = ref([
-  { position: [121.125169, 30.140966], icon: driverPng }, // 乘客位置
+  { position: [121.15530100000001, 30.045689], icon: driverPng }, // 乘客位置
 ]);
 
 // 拼车路线
@@ -155,16 +155,16 @@ const handleReviewSubmit = async (review) => {
   if (!error) {
     showReview.value = false;
     window.$message?.success(data.message);
-    // // 重新加载页面
-    // appStore.reloadPage();
+    // 重新加载页面
+    appStore.reloadPage();
   }
 }
 
 const handleReviewSkip = () => {
   showReview.value = false;
   window.$message?.info('已跳过评价');
+  appStore.reloadPage();
 }
-
 
 
 // 初始化时获取当前位置
@@ -177,12 +177,9 @@ onMounted(async () => {
   await orderStore.fetchTasks();
 
 });
-
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
-
-
 </script>
 
 <template>

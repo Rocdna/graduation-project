@@ -5,6 +5,7 @@ import { useRouterPush } from "@/hooks/common/router";
 import { useForm, useFormRules } from "@/hooks/common/form";
 import { useCaptcha } from "@/hooks/business/captcha";
 import { useAuthStore } from "@/store/modules/auth";
+import { fetchVerifyCode } from "@/service/api";
 
 defineOptions({ name: "Register" });
 
@@ -12,7 +13,7 @@ const authStore = useAuthStore();
 
 const { toggleLoginModule } = useRouterPush();
 const { formRef, validate } = useForm();
-const { label, isCounting, loading, getCaptcha, newCaptcha } = useCaptcha();
+const { label, isCounting, loading, getCaptcha } = useCaptcha();
 
 interface FormModel {
   userName: string;
@@ -24,12 +25,12 @@ interface FormModel {
 }
 
 const model = ref<FormModel>({
-  userName: "rocaler",
-  phone: "18000000000",
+  userName: "",
+  phone: "",
   code: "",
-  password: "123123",
-  confirmPassword: "123123",
-  role: "passenger",
+  password: "",
+  confirmPassword: "",
+  role: "",
 });
 
 const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
@@ -46,20 +47,14 @@ const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
 
 async function handleSubmit() {
   await validate();
-
-  // 后端验证码验证，请求验证码
-
   // 获取用户输入的验证码
   const inputCaptcha = model.value.code;
-  if (inputCaptcha != newCaptcha.value) {
-    window.$message?.error($t("page.login.common.invalidCode"));
+  if (!inputCaptcha) {
+    window.$message?.error?.('验证码不能为空');
     return;
   }
-
   // 注册逻辑，发送请求到服务器
-  await authStore.register(model.value.userName, model.value.phone, model.value.password, model.value.role)
-
-  // window.$message?.success($t("page.login.common.validateSuccess"));
+  await authStore.register(model.value.userName, model.value.phone, model.value.password, model.value.role, inputCaptcha)
 }
 
 

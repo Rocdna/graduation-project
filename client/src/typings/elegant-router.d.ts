@@ -41,6 +41,7 @@ declare module "@elegant-router/types" {
     "system_home": "/system/home";
     "system_manage": "/system/manage";
     "system_manage_driver": "/system/manage/driver";
+    "system_manage_log": "/system/manage/log";
     "system_manage_order": "/system/manage/order";
     "system_manage_passenger": "/system/manage/passenger";
     "system_manage_review": "/system/manage/review";
@@ -147,6 +148,7 @@ declare module "@elegant-router/types" {
     | "system_about"
     | "system_home"
     | "system_manage_driver"
+    | "system_manage_log"
     | "system_manage_order"
     | "system_manage_passenger"
     | "system_manage_review"

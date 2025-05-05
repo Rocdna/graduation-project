@@ -23,20 +23,36 @@ interface OrderTask {
     passengerId: any;
 }
 
-const baseInfo = {
-  _id: '',
-  driverId: {},
-  status: 'start',
-  passengerInfo: {},
-  tripId: '',
-  startLocation: [],
-  startAddress: '',
-  endAddress: '',
-  endLocation: [],
-  seatCount: 0,
-  totalPrice: 0,
-  startTime: ''
-};
+// const baseInfo = {
+//   _id: '',
+//   driverId: {},
+//   status: 'start',
+//   tripId: '',
+//   startLocation: [],
+//   startAddress: '',
+//   endAddress: '',
+//   endLocation: [],
+//   seatCount: 0,
+//   totalPrice: 0,
+//   startTime: ''
+// };
+
+// 定义初始数据生成函数
+function getBaseInfo() {
+  return {
+    _id: '',
+    driverId: {},
+    status: 'start',
+    tripId: '',
+    startLocation: [],
+    startAddress: '',
+    endAddress: '',
+    endLocation: [],
+    seatCount: 0,
+    totalPrice: 0,
+    startTime: ''
+  };
+}
 
 export const useOrderStore = defineStore(SetupStoreId.Order, () => {
   const { loading, startLoading, endLoading } = useLoading();
@@ -44,7 +60,7 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
   // 使用 reactive 定义状态对象
   const state = reactive({
     tasks: [] as OrderTask[],
-    passengerOrder: baseInfo
+    passengerOrder: getBaseInfo()
   });
 
   // 计算属性
@@ -61,6 +77,7 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
     }
     endLoading();
   }
+
   // 司机接受订单
   async function matchOrder(orderId: string) {
     startLoading();
@@ -137,6 +154,14 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
   async function cancelOrder(orderId: string) {
     // 把对应订单号的订单从 tasks 列表中删除
     state.tasks = state.tasks.filter(task => task._id !== orderId);
+    window.$message?.success('订单已取消');
+  }
+
+  // 乘客创建新的订单，广播给司机消息
+  async function newOrder(order: OrderTask) {
+    console.log(order);
+    state.tasks.push(order);
+    window.$message?.success('您有新的订单啦！');
   }
 
   // 乘客实时获取当前订单
@@ -163,10 +188,13 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
   // 乘客订单被接单
   async function orderMatched(order: OrderTask) {
     try {
-      
-      if (order.driverId._id === state.passengerOrder._id) {
-        state.passengerOrder.status = 'confirmed';
+      if (order._id === state.passengerOrder._id) {
+        state.passengerOrder.status = 'matched';
+        console.log(order.driverId);
         Object.assign(state.passengerOrder.driverId, order.driverId);
+        console.log(state.passengerOrder.driverId);
+      } else {
+        console.error('订单确认失败:', '订单ID不匹配');
       }
     } catch(error) {
       console.error('接单失败:', error);
@@ -191,11 +219,6 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
     }
   }
 
-  // 乘客数据重置
-  function resetPassengerOrder() {
-    state.passengerOrder = baseInfo;
-  }
-
   // 乘客取消订单  返回值
   async function orderCancelled(orderId: string, info: { reason?: string, status: 'cancelled' }) {
     startLoading();
@@ -204,7 +227,7 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
       try {
         const { data, error } = await fetchCancelOrder(orderId, info);
         if (!error) {
-          state.passengerOrder = baseInfo;
+          resetPassengerOrder();
           window.$message?.success('订单已取消！');
           flag = true;
         }
@@ -249,6 +272,10 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
     return flag;
   }
 
+  // 乘客数据重置
+  function resetPassengerOrder() {
+    Object.assign(state.passengerOrder, getBaseInfo());
+  }
   // 清空任务数据
   function clearTasks() {
     state.tasks = [];
@@ -273,7 +300,8 @@ export const useOrderStore = defineStore(SetupStoreId.Order, () => {
     createOrder,
     currentStatus,
     driverInfo,
-    resetPassengerOrder
+    resetPassengerOrder,
+    newOrder
   };
 })
 

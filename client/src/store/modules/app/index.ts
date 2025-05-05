@@ -75,6 +75,7 @@ export const useAppStore = defineStore(SetupStoreId.App, () => {
   }
 
   function init() {
+    localStg.set('bgEffect', true);
     setDayjsLocale(locale.value);
   }
 

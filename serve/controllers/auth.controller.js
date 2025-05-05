@@ -1,5 +1,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { sendSMS } from "../utils/captcha.js";
+import chalk from "chalk";
+
+// 临时存储验证码（生产环境使用 Redis）
+const verificationCodes = new Map();
 
 // 密码强度要求
 const passwordRequirements = {
@@ -67,7 +72,25 @@ export const isExists = async (req, res) => {
 // 注册
 export const register = async (req, res) => {
   try {
-    const { userName, password, role, phone } = req.body;
+    const { userName, password, role, phone, code } = req.body;
+
+    const phoneNumber = '+86' + phone;
+
+    const stored = verificationCodes.get(phoneNumber);
+    if (!stored) {
+      return res.status(203).json({ code: 203, message: '验证码不存在或已过期', data: { success: false } });
+    }
+
+    if (stored.expires < Date.now()) {
+      verificationCodes.delete(phoneNumber);
+      return res.status(203).json({ code: 203, message: '验证码已过期', data: { success: false } });
+    }
+
+    if (stored.code !== code) {
+      return res.status(203).json({ code: 203, message: '验证码错误', data: { success: false } });
+    } 
+
+    verificationCodes.delete(phoneNumber);
 
     // 验证请求体
     if (!userName || !password) {
@@ -121,8 +144,6 @@ export const register = async (req, res) => {
     if (error.name === "MongoServerError" && error.code === 11000) {
       return res.status(400).json({ code: 400, message: "*********", data:{} });
     }
-    // Log the error with more context
-    console.error(`Registration error for username ${username}:`, error);
     // Return a more structured error response
     res.status(500).json({
       code: 400,
@@ -360,3 +381,85 @@ export const getUserInfo = async (req, res) => {
     });
   }
 }
+
+
+// 发送验证码
+export const sendVerification = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber || !/^\+86\d{11}$/.test(phoneNumber)) {
+      return res.status(203).json({ code: 203, message: '无效的手机号', data: { success: false } });
+    }
+
+    // 生成4位随机验证码
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+    console.log(chalk.greenBright(`发送验证码: ${code}`));
+
+    const result = await sendSMS(phoneNumber, code);
+
+    if (result.msg == '成功' || result.code == '0') {
+      // 存储验证码（有效期5分钟）
+      verificationCodes.set(phoneNumber, { code, expires: Date.now() + 5 * 60 * 1000 });
+      res.status(200).json({ code: 200, message: '验证码已发送', data: { success: true } });
+    } else {
+      res.status(203).json({ code: 203, message: '发送验证码失败', data: { success: false } });
+    }
+  } catch (error) {
+    console.error('发送验证码失败:', error);
+    res.status(500).json({ code: 500, message: '发送验证码失败', data: { success: false } });
+  }
+};
+
+
+// 登录验证验证码，验证码正确返回token
+export const verifyCode = async (req, res) => {
+  try {
+    const { phoneNumber, code } = req.body;
+    if (!phoneNumber || !code) {
+      return res.status(203).json({ code: 203, message: '手机号或验证码不能为空', data: { success: false } });
+    }
+
+    const stored = verificationCodes.get(phoneNumber);
+    if (!stored) {
+      return res.status(203).json({ code: 203, message: '验证码不存在或已过期', data: { success: false } });
+    }
+
+    if (stored.expires < Date.now()) {
+      verificationCodes.delete(phoneNumber);
+      return res.status(203).json({ code: 203, message: '验证码已过期', data: { success: false } });
+    }
+
+    const phone = phoneNumber.replace('+86', '')
+
+    // 查找用户
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(200).json({
+        code: 201, 
+        message: "该用户不存在" ,
+        data: { exists: false }
+      });
+    }
+
+    if (stored.code === code) {
+      verificationCodes.delete(phoneNumber);
+      // 生成JWT
+      const tokens = generateTokens(user);
+      res.status(200).json({ 
+        code: 200, 
+        message: '验证成功', 
+        data: { 
+          success: true,
+          token: tokens.token,
+          refreshToken: tokens.refreshToken
+        } 
+      });
+    } else {
+      res.status(203).json({ code: 203, message: '验证码错误', data: { success: false } });
+    }
+  } catch (error) {
+    console.error('验证验证码失败:', error);
+    res.status(500).json({ code: 500, message: '验证验证码失败', data: { success: false } });
+  }
+};

@@ -12,6 +12,9 @@ declare namespace StorageType {
   }
 
   interface Local {
+    /** 全屏特效 */
+    bgEffect: boolean;
+    /** 角色 */
     role: string;
     /** The i18n language */
     lang: App.I18n.LangType;

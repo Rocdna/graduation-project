@@ -7,8 +7,10 @@ import ReviewCard from './modules/review-card.vue'
 import Map from '@/components/common/leafletMap.vue'
 import startIcon from '@/assets/imgs/start.png'  // 起点
 import endIcon from '@/assets/imgs/end.png'
-import { formatToLocal } from '@/utils/format'
 import { useOrderStore } from "@/store/modules/order";
+import { useAppStore } from "@/store/modules/app";
+
+const appstore = useAppStore();
 
 const orderStore = useOrderStore();
 // 防抖函数
@@ -37,11 +39,12 @@ const routes = ref([
 ]);
 
 // 订单信息
-const orderStatus = computed(() => orderStore.currentStatus);       // 订单状态，默认未发出订单
+const orderStatus = computed(() => orderStore.state.passengerOrder.status);         // 订单状态，默认未发出订单
 const driverInfo = computed(() => orderStore.state.passengerOrder.driverId);           // 司机信息
-const orderInfo = computed(() => orderStore.state.passengerOrder);
 const orderCancelReason = ref('');              // 订单取消理由
 const completedTime = ref('');                // 完成时间
+const orderInfo = computed(() => orderStore.state.passengerOrder);
+
 
 // 需要时间
 const drivingTime = ref(null);
@@ -495,7 +498,6 @@ const disablePastDates = (time) => {
 // 发布订单----
 const publishOrder = async () => {
   if (!canPublishOrder.value) return; // 防止未满足条件时点击
-
   // 模拟发布订单（实际需调用后端 API）
   const orderData = {
     startAddress: orderInfo.value.startAddress,
@@ -512,7 +514,6 @@ const publishOrder = async () => {
     // 发送请求
     const flag = orderStore.createOrder(orderData);
     if (flag) {
-      orderInfo.value.startTime = formatToLocal(orderInfo.value.startTime);
       showOrderDialog.value = false;
       showSettingsDrawer.value = false;
     }
@@ -524,21 +525,20 @@ const publishOrder = async () => {
 // 监听订单状态变化
 watch(orderStatus, (newStatus) => {
   if (newStatus === 'matched') {
-    // markers.value = [
-    //   ...markers.value,
-    //   {
-    //     position: [121.15530100000001, 30.045689], // 更合理的模拟位置
-    //     title: `司机：${driverInfo.value.name}`,
-    //     icon: driverPng
-    //   }
-    // ];
+    markers.value = [
+      ...markers.value,
+      {
+        position: [121.15530100000001, 30.045689], // 更合理的模拟位置
+        title: `司机：${driverInfo.value.name}`
+      }
+    ];
   }
   if (newStatus === 'confirmed') {
     // 清除起点标签
     markers.value = markers.value.filter((_, index) => index !== 0);
   }
-
   if (newStatus === 'completed') {
+    console.log('1清除标记和路线')
     showPayment.value = true;
     markers.value = [];
     routes.value = [];
@@ -548,12 +548,14 @@ watch(orderStatus, (newStatus) => {
     endLocation.value = null;
   }
   if (newStatus === 'cancelled') {
+    console.log('2清除标记和路线')
     markers.value = [];
     routes.value = [];
     isStartSet.value = false;
     isEndSet.value = false;
     startLocation.value = null;
     endLocation.value = null;
+    currentInputType.value = 'start'
   }
 })
 
@@ -616,6 +618,7 @@ const confirmCancelOrder = async () => {
       showCancelDialog.value = false;
       showSettingsDrawer.value = false;
       showOrderDialog.value = false;
+      appstore.reloadPage(500);
     }
   } catch (error) {
     console.log(error)
@@ -648,6 +651,7 @@ const handleReviewSubmit = async (review) => {
     showReview.value = false;
     window.$message?.success(data.message);
     orderStore.resetPassengerOrder();
+    appstore.reloadPage();
   }
 };
 
@@ -656,33 +660,29 @@ const handleReviewSkip = () => {
   showReview.value = false;
   window.$message?.info('已跳过评价');
   orderStore.resetPassengerOrder();
+  appstore.reloadPage();
+  
 };
 
 // 处理订单数据并在地图上绘制
 const processOrderOnMap = () => {
   if (!geocoder || !driving || orderStatus.value === 'start') return;
-
   const startAddress = orderInfo.value.startAddress;
   const endAddress = orderInfo.value.endAddress;
-
   // 使用 Geocoder 将地址转为经纬度
   geocoder.getLocation(startAddress, (status, startResult) => {
     if (status === 'complete' && startResult.info === 'OK') {
       const startLngLat = startResult.geocodes[0].location;
-
       geocoder.getLocation(endAddress, (status, endResult) => {
         if (status === 'complete' && endResult.info === 'OK') {
           const endLngLat = endResult.geocodes[0].location;
-
           // 更新 markers 数组，触发子组件的 watch
           markers.value = [
             { position: [startLngLat.lng, startLngLat.lat], title: '起点', icon: startIcon },
             { position: [endLngLat.lng, endLngLat.lat], title: '终点', icon: endIcon },
           ];
-          
           // 路线
           calculateRoute();
-
         } else {
           console.error('终点地址转换失败:', endResult);
         }

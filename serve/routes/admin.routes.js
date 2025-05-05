@@ -20,9 +20,10 @@ import {
     batchDeleteDriver,
     auditReview,
     deleteReview,
-    getReviewsList
-
-
+    getReviewsList,
+    getLogsList,
+    getNotificationsList,
+    deleteNotification
 } from "../controllers/admin.controller.js";
 import { getOrderById } from '../controllers/order.controller.js'
 
@@ -105,6 +106,16 @@ router.post('/reviews/audit', authMiddleware(["admin"]), auditReview)
 router.delete('/reviews/:id', authMiddleware(["admin"]), deleteReview)
 
 
+//------
 
+// 获取所有操作日志
+router.get('/logs', authMiddleware(["admin"]), getLogsList)
+
+
+// 获取通知消息列表
+router.get('/notifications', authMiddleware(["admin"]), getNotificationsList)
+
+// 删除通知消息
+router.delete('/notifications/:id', authMiddleware(["admin"]), deleteNotification)
 
 export default router

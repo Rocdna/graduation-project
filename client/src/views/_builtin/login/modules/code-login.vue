@@ -4,12 +4,15 @@ import { $t } from '@/locales';
 import { useRouterPush } from '@/hooks/common/router';
 import { useForm, useFormRules } from '@/hooks/common/form';
 import { useCaptcha } from '@/hooks/business/captcha';
+import { useAuthStore } from '@/store/modules/auth';
 
 defineOptions({ name: 'CodeLogin' });
 
+const authStore = useAuthStore();
+
 const { toggleLoginModule } = useRouterPush();
 const { formRef, validate } = useForm();
-const { label, isCounting, loading, getCaptcha, newCaptcha } = useCaptcha();
+const { label, isCounting, loading, getCaptcha } = useCaptcha();
 
 interface FormModel {
   phone: string;
@@ -20,20 +23,18 @@ const model = ref<FormModel>({ phone: '18000000000', code: '' });
 
 const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
   const { formRules } = useFormRules();
-
   return { phone: formRules.phone, code: formRules.code };
 });
 
+// 验证码、密码验证
 async function handleSubmit() {
   await validate();
   const inputCaptcha = model.value.code;
-  if (inputCaptcha != newCaptcha.value) {
-    window.$message?.error($t("page.login.common.invalidCode"));
+  if (!inputCaptcha) {
+    window.$message?.error?.('验证码不能为空');
     return;
   }
-
-  // 验证码登录请求
-  window.$message?.success($t('page.login.common.validateSuccess'));
+  await authStore.loginByCode(model.value.phone, model.value.code);
 }
 </script>
 

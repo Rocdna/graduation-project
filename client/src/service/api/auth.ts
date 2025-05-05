@@ -46,7 +46,7 @@ export function fetchRefreshToken(refreshToken: string) {
  * @param password Password
  * @param role Role
  */
-export function fetchRegister(userName: string, phone: string, password: string, role: string) {
+export function fetchRegister(userName: string, phone: string, password: string, role: string, code: string) {
   return request({
     url: '/auth/register',
     method: 'post',
@@ -54,7 +54,8 @@ export function fetchRegister(userName: string, phone: string, password: string,
       userName,
       phone,
       password,
-      role
+      role,
+      code
     }
   });
 }
@@ -88,5 +89,35 @@ export function fetchCustomBackendError(code: string, msg: string) {
   return request({ url: '/auth/error', params: { code, msg } });
 }
 
+/**
+ * 发送短信验证码
+ *
+ * @param phoneNumber Phone number (e.g., +8612345678900)
+ */
+export function fetchSendVerification(phoneNumber: string) {
+  return request({
+    url: '/auth/sendVerification',
+    method: 'post',
+    data: {
+      phoneNumber: "+86" + phoneNumber
+    }
+  });
+}
 
+/**
+ * 验证短信验证码
+ *
+ * @param phoneNumber Phone number (e.g., +8612345678900)
+ * @param code Verification code
+ */
+export function fetchVerifyCode(phoneNumber: string, code: string) {
+  return request({
+    url: '/auth/verifyCode',
+    method: 'post',
+    data: {
+      phoneNumber: "+86" + phoneNumber,
+      code
+    }
+  });
+}
 
